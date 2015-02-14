@@ -13,6 +13,8 @@ public class GUITimer : MonoBehaviour {
         private set { timer = value; }
     }
 
+    public bool countBack = true;
+
     void OnEnable()
     {
         timer.IntervalEvent += OnTimerAlarm;
@@ -32,7 +34,7 @@ public class GUITimer : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
     {
-        //timer.StartTimer(alarm);
+       
 	}
 	
     void OnTimerAlarm(TimerThingy sender,  float t)
@@ -42,7 +44,15 @@ public class GUITimer : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        guiText.text = timer.TimePast.ToString("0.0");
+
+        if (countBack)
+        {
+            guiText.text = timer.TimeLeft.ToString("0.0");
+        }
+        else
+        {
+            guiText.text = timer.TimePast.ToString("0.0");
+        }
 	}
 
     
