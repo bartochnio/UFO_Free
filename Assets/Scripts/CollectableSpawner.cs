@@ -6,6 +6,7 @@ public class CollectableSpawner : MonoBehaviour {
     public BezierSpline track;
     public int amount;
     public float diff;
+    public float radiusBias = 0.1f;
     public GameObject collectable;
     public int points;
 
@@ -28,13 +29,12 @@ public class CollectableSpawner : MonoBehaviour {
             Vector2 newPos = track.GetPoint(t) + side;
 
             bool collided = false;
-            float bias = 0.1f;
             foreach (Collectable other in collectables)
             {
                 if (other == null)
                     continue;
 
-                float d = 2.0f * other.GetColliderRadius() + bias;
+                float d = 2.0f * other.GetColliderRadius() + radiusBias;
                 if (Vector2.Distance(newPos, other.GetPos()) < d)
                 {
                     collided = true;
