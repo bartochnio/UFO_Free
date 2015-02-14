@@ -120,7 +120,14 @@ public class MenuMgr : MonoBehaviour {
     
     public void SetStagesButtons(StagePack p)
     {
-        Object firstButton = stageC.GetComponentInChildren<Button>().gameObject as Object;
+        
+        GameObject firstButton = stageC.GetComponentInChildren<Button>().gameObject;
+
+        for (int i = 1; i < firstButton.transform.parent.childCount; i++ )
+        {
+            Destroy(firstButton.transform.parent.GetChild(i).gameObject);
+        }
+
 
         (firstButton as GameObject).GetComponent<Button>().onClick.AddListener(() =>
             {
@@ -129,7 +136,7 @@ public class MenuMgr : MonoBehaviour {
 
         for (int i = 1; i < p.StageCount; i++)
         {
-            GameObject o = Instantiate(firstButton) as GameObject;
+            GameObject o = Instantiate((Object)firstButton) as GameObject;
             
             o.transform.SetParent((firstButton as GameObject).transform.parent);
             o.transform.localScale = Vector3.one;
