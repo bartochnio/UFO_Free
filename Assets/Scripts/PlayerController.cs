@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-//kzyg: Temp for testing collisions with the track
 public class PlayerController : MonoBehaviour {
 
     public float speed = 10.0f;

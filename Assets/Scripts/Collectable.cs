@@ -17,13 +17,28 @@ public class Collectable : MonoBehaviour {
         set { points = value; }
     }
 
+    public float GetColliderRadius()
+    {
+        return collider.radius * transform.localScale.x;
+    }
+
+    public Vector2 GetPos()
+    {
+        return transform.position;
+    }
+
     private int points;
     private SpriteRenderer sprite;
+    private CircleCollider2D collider;
+
+    void Awake()
+    {
+        sprite = gameObject.GetComponent<SpriteRenderer>();
+        collider = gameObject.GetComponent<CircleCollider2D>();
+    }
 
 	void Start () 
     {
-        sprite = gameObject.GetComponent<SpriteRenderer>();
-
         if (collectType == CollectType.Good)
             sprite.color = Color.green;
         else
