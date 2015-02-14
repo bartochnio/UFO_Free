@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
     private GameObject arrow;
     private SpriteRenderer arrowSprite;
     private Vector2 velocity = Vector2.zero;
+    private GameObject item = null; //TODO: Add a list of all collided pickups
 
     public void Respawn()
     {
@@ -32,6 +33,7 @@ public class PlayerController : MonoBehaviour {
     {
         Move();
         ShowArrow();
+        CollectItem();
 
         counter -= Time.deltaTime;
         if (counter <= 0.0f)
@@ -60,6 +62,18 @@ public class PlayerController : MonoBehaviour {
         arrowSprite.color = (Mathf.Sin(Time.time * 10.0f) * 0.5f + 0.5f) * Color.red;
     }
 
+    void CollectItem()
+    {
+        if (item != null && Input.GetButtonDown("Jump"))
+        {
+            Collectable.CollectType colT = item.GetComponent<Collectable>().collectType;
+
+            Destroy(item);
+            Scene.GlobalInstance.ScoreCollectible(colT);
+            item = null;
+        }
+    }
+
     void Move()
     {
         Vector2 axis = Vector3.zero;
@@ -79,13 +93,9 @@ public class PlayerController : MonoBehaviour {
 
     void OnTriggerStay2D(Collider2D other) 
     {
-        if (other.tag == "Collectable" && Input.GetButtonDown("Jump"))
+        if (other.tag == "Collectable")
         {
-
-           Collectable.CollectType colT = other.GetComponent<Collectable>().collectType;
-
-           Destroy(other.gameObject);
-           Scene.GlobalInstance.ScoreCollectible(colT);
+            item = other.gameObject;
         }
         else
         {
@@ -99,6 +109,10 @@ public class PlayerController : MonoBehaviour {
         if (other.tag == "Track")
         {
             isOutside = true;
+        }
+        else if(other.tag == "Collectable")
+        {
+            item = null;
         }
     }
 }
