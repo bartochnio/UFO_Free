@@ -67,7 +67,7 @@ public class PlayerController : MonoBehaviour {
         {
             Collectable.CollectType colT = item.GetComponent<Collectable>().collectType;
 
-            Destroy(item);
+            item.SendMessage("SetBeam", transform);
             Scene.GlobalInstance.ScoreCollectible(colT);
             item = null;
         }
@@ -90,13 +90,21 @@ public class PlayerController : MonoBehaviour {
         transform.position += (Vector3)velocity * Time.deltaTime;
     }
 
-    void OnTriggerStay2D(Collider2D other) 
+    void OnTriggerEnter2D(Collider2D other)
     {
         if (other.tag == "Collectable")
         {
+            if (item != null)
+                item.SendMessage("SetIdle");
+
             item = other.gameObject;
+            item.SendMessage("SetFlash");
         }
-        else
+    }
+
+    void OnTriggerStay2D(Collider2D other) 
+    {
+        if (other.tag == "Track")
         {
             counter = timer;
             isOutside = false;
@@ -111,6 +119,9 @@ public class PlayerController : MonoBehaviour {
         }
         else if(other.tag == "Collectable")
         {
+            if (item != null)
+                item.SendMessage("SetIdle");
+            
             item = null;
         }
     }
