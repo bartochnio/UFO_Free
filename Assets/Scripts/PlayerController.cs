@@ -34,7 +34,10 @@ public class PlayerController : MonoBehaviour {
     {
         Move();
         ShowArrow();
-        CollectItem();
+
+		if (Input.GetButtonDown("Jump")) {
+        	CollectItem();
+		}
 
         counter -= Time.deltaTime;
         if (counter <= 0.0f)
@@ -62,9 +65,9 @@ public class PlayerController : MonoBehaviour {
         arrowSprite.color = (Mathf.Sin(Time.time * 10.0f) * 0.5f + 0.5f) * Color.red;
     }
 
-    void CollectItem()
+    public void CollectItem()
     {
-        if (curItem != null && Input.GetButtonDown("Jump"))
+        if (curItem != null)
         {
             Collectable.CollectType colT = curItem.GetComponent<Collectable>().collectType;
 
@@ -79,8 +82,8 @@ public class PlayerController : MonoBehaviour {
     void Move()
     {
         Vector2 axis = Vector3.zero;
-        axis.x = Input.GetAxis("Horizontal");
-        axis.y = Input.GetAxis("Vertical");
+		axis.x = VirtualPad.globalInstance.Horizontal; //Input.GetAxis("Horizontal");
+		axis.y = VirtualPad.globalInstance.Vertical; //Input.GetAxis("Vertical");
 
         if (axis.sqrMagnitude > 0.00001f)
         {
