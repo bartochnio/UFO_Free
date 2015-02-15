@@ -34,7 +34,7 @@ public class GUITimer : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
     {
-       
+
 	}
 	
     void OnTimerAlarm(TimerThingy sender,  float t)
@@ -48,12 +48,18 @@ public class GUITimer : MonoBehaviour {
         if (countBack)
         {
             guiText.text = timer.TimeLeft.ToString("0.0");
+
+            float t = Mathf.Sin(Time.time * 10.0f) * 0.5f + 0.5f;
+            if (timer.TimeLeft < 15.0f)
+            {
+                guiText.color = Color.Lerp(Color.white, Color.red, t);
+            }
+            else
+                guiText.color = Color.white;
         }
         else
         {
             guiText.text = timer.TimePast.ToString("0.0");
         }
 	}
-
-    
 }

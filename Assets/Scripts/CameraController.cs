@@ -18,4 +18,18 @@ public class CameraController : MonoBehaviour {
         cur.z = trg.z = -10.0f;
         transform.position = Vector3.MoveTowards(cur, trg, Time.deltaTime * Vector3.Distance(cur, trg) * speed);
 	}
+
+    public void Shake()
+    {
+        StartCoroutine("ShakeEffect");
+    }
+
+    IEnumerator ShakeEffect()
+    {
+        for(int i = 0; i < 20; ++i)
+        {
+            transform.position += (Vector3)(Random.insideUnitCircle * 0.2f);
+            yield return null;
+        }
+    }
 }
