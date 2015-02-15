@@ -14,7 +14,13 @@ public class OutOfThePlayzone : MonoBehaviour
 
     public float timeToEmergency = 3.0f;
 
-    bool isRunning = false;
+    bool isRunning = true;
+
+
+    void OnLevelWasLoaded()
+    {
+        SetEmergencyScreen(false);
+    }
 
     public void SetEmergencyScreen(bool value)
     {
@@ -38,7 +44,7 @@ public class OutOfThePlayzone : MonoBehaviour
 	// Use this for initialization
 	void Start () {
         timer.countBack = true;
-        SetEmergencyScreen(false);
+        
 	}
 	
 }
