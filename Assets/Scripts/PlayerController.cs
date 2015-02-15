@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-//kzyg: Temp for testing collisions with the track
 public class PlayerController : MonoBehaviour {
 
     public float speed = 10.0f;
@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour {
     private GameObject arrow;
     private SpriteRenderer arrowSprite;
     private Vector2 velocity = Vector2.zero;
-    private GameObject item = null; //TODO: Add a list of all collided pickups
+    private GameObject curItem = null;
+    private List<GameObject> items = new List<GameObject>();
 
     
 
@@ -34,12 +35,17 @@ public class PlayerController : MonoBehaviour {
     {
         Move();
         ShowArrow();
-        CollectItem();
+
+		if (Input.GetButtonDown("Jump")) {
+        	CollectItem();
+		}
+
 
         //counter -= Time.deltaTime;
         //if (counter <= 0.0f)
            // Scene.GlobalInstance.FinishStage(0.0f);
 
+       
 	}
 
     void ShowArrow()
@@ -63,23 +69,25 @@ public class PlayerController : MonoBehaviour {
         arrowSprite.color = (Mathf.Sin(Time.time * 10.0f) * 0.5f + 0.5f) * Color.red;
     }
 
-    void CollectItem()
+    public void CollectItem()
     {
-        if (item != null && Input.GetButtonDown("Jump"))
+        if (curItem != null)
         {
-            Collectable.CollectType colT = item.GetComponent<Collectable>().collectType;
+            Collectable.CollectType colT = curItem.GetComponent<Collectable>().collectType;
 
-            Destroy(item);
+            curItem.SendMessage("SetBeam", transform);
             Scene.GlobalInstance.ScoreCollectible(colT);
-            item = null;
+
+            items.Remove(curItem);
+            SetNextItem();
         }
     }
 
     void Move()
     {
         Vector2 axis = Vector3.zero;
-        axis.x = Input.GetAxis("Horizontal");
-        axis.y = Input.GetAxis("Vertical");
+		axis.x = VirtualPad.globalInstance.Horizontal; //Input.GetAxis("Horizontal");
+		axis.y = VirtualPad.globalInstance.Vertical; //Input.GetAxis("Vertical");
 
         if (axis.sqrMagnitude > 0.00001f)
         {
@@ -92,16 +100,37 @@ public class PlayerController : MonoBehaviour {
         transform.position += (Vector3)velocity * Time.deltaTime;
     }
 
-    void OnTriggerStay2D(Collider2D other) 
+    void SetNextItem()
+    {
+        if (items.Count > 0)
+        {
+            curItem = items[items.Count - 1];
+            curItem.SendMessage("SetFlash");
+        }
+
+        else
+            curItem = null;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
     {
         if (other.tag == "Collectable")
         {
-            item = other.gameObject;
+            if (curItem != null)
+                curItem.SendMessage("SetIdle");
+
+            curItem = other.gameObject;
+            curItem.SendMessage("SetFlash");
+            items.Add(curItem);
         }
-        else if (other.tag == "Track")
+    }
+    
+    void OnTriggerStay2D(Collider2D other) 
+    {
+        if (other.tag == "Track")
+            
         {
             Scene.GlobalInstance.SetOutsideTheTrack(false);
-            //counter = timer;
             isOutside = false;
         }
     }
@@ -115,7 +144,14 @@ public class PlayerController : MonoBehaviour {
         }
         else if(other.tag == "Collectable")
         {
-            item = null;
+            if (curItem == other.gameObject)
+            {
+                curItem.SendMessage("SetIdle");
+                items.Remove(curItem);
+                SetNextItem();
+            }
+            else
+                items.Remove(other.gameObject);
         }
     }
 }

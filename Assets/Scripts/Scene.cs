@@ -7,6 +7,7 @@ public class Scene : MonoBehaviour {
     public float stageTime;
     public GUITimer timer;
     public PlayerController player;
+    public CameraController camera;
     public bool isPaused = false;
 
 
@@ -84,6 +85,7 @@ public class Scene : MonoBehaviour {
         }
         else
         {
+            camera.Shake();
             s = BadPoints;
             currentBadCollectibles++;
         }
