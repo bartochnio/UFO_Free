@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour {
 
@@ -13,7 +14,8 @@ public class PlayerController : MonoBehaviour {
     private GameObject arrow;
     private SpriteRenderer arrowSprite;
     private Vector2 velocity = Vector2.zero;
-    private GameObject item = null; //TODO: Add a list of all collided pickups
+    private GameObject curItem = null;
+    private List<GameObject> items = new List<GameObject>();
 
     public void Respawn()
     {
@@ -37,7 +39,6 @@ public class PlayerController : MonoBehaviour {
         counter -= Time.deltaTime;
         if (counter <= 0.0f)
             Scene.GlobalInstance.FinishStage(0.0f);
-
 	}
 
     void ShowArrow()
@@ -63,13 +64,15 @@ public class PlayerController : MonoBehaviour {
 
     void CollectItem()
     {
-        if (item != null && Input.GetButtonDown("Jump"))
+        if (curItem != null && Input.GetButtonDown("Jump"))
         {
-            Collectable.CollectType colT = item.GetComponent<Collectable>().collectType;
+            Collectable.CollectType colT = curItem.GetComponent<Collectable>().collectType;
 
-            item.SendMessage("SetBeam", transform);
+            curItem.SendMessage("SetBeam", transform);
             Scene.GlobalInstance.ScoreCollectible(colT);
-            item = null;
+
+            items.Remove(curItem);
+            SetNextItem();
         }
     }
 
@@ -90,15 +93,27 @@ public class PlayerController : MonoBehaviour {
         transform.position += (Vector3)velocity * Time.deltaTime;
     }
 
+    void SetNextItem()
+    {
+        if (items.Count > 0)
+        {
+            curItem = items[items.Count - 1];
+            curItem.SendMessage("SetFlash");
+        }
+        else
+            curItem = null;
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.tag == "Collectable")
         {
-            if (item != null)
-                item.SendMessage("SetIdle");
+            if (curItem != null)
+                curItem.SendMessage("SetIdle");
 
-            item = other.gameObject;
-            item.SendMessage("SetFlash");
+            curItem = other.gameObject;
+            curItem.SendMessage("SetFlash");
+            items.Add(curItem);
         }
     }
 
@@ -119,10 +134,14 @@ public class PlayerController : MonoBehaviour {
         }
         else if(other.tag == "Collectable")
         {
-            if (item != null)
-                item.SendMessage("SetIdle");
-            
-            item = null;
+            if (curItem == other.gameObject)
+            {
+                curItem.SendMessage("SetIdle");
+                items.Remove(curItem);
+                SetNextItem();
+            }
+            else
+                items.Remove(other.gameObject);
         }
     }
 }
