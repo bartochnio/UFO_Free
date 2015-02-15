@@ -23,9 +23,9 @@ public class ScorringScreen : MonoBehaviour
         timeLeftText.text = "0";
 
 
-        int goodS = good * 10;
-        int badS = bad * 10;
-        int tScore = (int)(tLeft * 10);
+        int goodS = good * goodScore;
+        int badS = bad * badScore;
+        int tScore = (int)(tLeft * timeScore);
         int gScore = goodS + badS + tScore;
 
         int aS = 0;
@@ -55,7 +55,7 @@ public class ScorringScreen : MonoBehaviour
         }
 
         int tG = 0;
-        for (int i = 0; i < bad; i++)
+        for (int i = 0; i < (int)tLeft; i++)
         {
 
             aS += 10;

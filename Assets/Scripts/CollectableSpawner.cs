@@ -9,7 +9,7 @@ public class CollectableSpawner : MonoBehaviour {
     public GameObject collectable;
     public int points;
 
-	void Start () 
+	void Awake () 
     {
         Spawn();
 	}
@@ -31,8 +31,5 @@ public class CollectableSpawner : MonoBehaviour {
         }
     }
 	
-	void Update () 
-    {
 	
-	}
 }

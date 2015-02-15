@@ -9,17 +9,18 @@ public class PlayerController : MonoBehaviour {
     public BezierSpline track;
     public float timer = 2.0f;
 
-    private float counter = 0.0f;
+    //private float counter = 0.0f;
     private bool isOutside = false;
     private GameObject arrow;
     private SpriteRenderer arrowSprite;
     private Vector2 velocity = Vector2.zero;
     private GameObject item = null; //TODO: Add a list of all collided pickups
 
+    
+
     public void Respawn()
     {
         transform.position = track.GetPoint(0.0f);
-        counter = timer;
     }
 
 	void Start () 
@@ -35,9 +36,9 @@ public class PlayerController : MonoBehaviour {
         ShowArrow();
         CollectItem();
 
-        counter -= Time.deltaTime;
-        if (counter <= 0.0f)
-            Scene.GlobalInstance.FinishStage(0.0f);
+        //counter -= Time.deltaTime;
+        //if (counter <= 0.0f)
+           // Scene.GlobalInstance.FinishStage(0.0f);
 
 	}
 
@@ -97,9 +98,10 @@ public class PlayerController : MonoBehaviour {
         {
             item = other.gameObject;
         }
-        else
+        else if (other.tag == "Track")
         {
-            counter = timer;
+            Scene.GlobalInstance.SetOutsideTheTrack(false);
+            //counter = timer;
             isOutside = false;
         }
     }
@@ -108,6 +110,7 @@ public class PlayerController : MonoBehaviour {
     {
         if (other.tag == "Track")
         {
+            Scene.GlobalInstance.SetOutsideTheTrack(true);
             isOutside = true;
         }
         else if(other.tag == "Collectable")

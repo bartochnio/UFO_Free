@@ -17,6 +17,7 @@ public class Scene : MonoBehaviour {
     public const int GoodPoints = 10;
     public const int BadPoints = -10;
 
+    public OutOfThePlayzone outOfPlayzoneScript;
 
     public int CurrentCollectScore
     {
@@ -61,6 +62,8 @@ public class Scene : MonoBehaviour {
         List<Collectable> all = new List<Collectable>(FindObjectsOfType<Collectable>());
 
         maxGoodCollectibles = all.FindAll(x => x.collectType == Collectable.CollectType.Good).Count;
+
+        outOfPlayzoneScript = FindObjectOfType<OutOfThePlayzone>();
 
 	}
 
@@ -114,7 +117,13 @@ public class Scene : MonoBehaviour {
         // Need Refactor on this
         StartCoroutine( menuMgr.endScreenSucces.GetComponentInChildren<ScorringScreen>().ScoringRoutine(currentGoodCollectibles, currentBadCollectibles, timer.Timer.TimeLeft, GoodPoints, BadPoints, 10));
     }
-    
+
+    public void SetOutsideTheTrack(bool value)
+    {
+        if (outOfPlayzoneScript != null)
+            outOfPlayzoneScript.SetEmergencyScreen(value);
+        else Debug.LogError(name + " out of the playzone script is missing");
+    }
 
     public void SetPause(bool value)
     {
