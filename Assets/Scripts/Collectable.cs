@@ -53,9 +53,9 @@ public class Collectable : MonoBehaviour {
 	void Start () 
     {
         if (collectType == CollectType.Good)
-            baseColor = Color.green;
+            baseColor = Color.green * RenderSettings.ambientLight;
         else
-            baseColor = Color.red;
+            baseColor = Color.red * RenderSettings.ambientLight;
 
         sprite.color = baseColor;
         state = State.idle;
@@ -90,7 +90,11 @@ public class Collectable : MonoBehaviour {
         {
             i += 0.01f;
             float t = (Mathf.Sin(i*20.0f) * 0.5f + 0.5f);
-            sprite.color = Color.Lerp(baseColor, Color.yellow, t);
+
+            Color c = baseColor;
+            c *= new Color(5.0f, 5.0f, 1.5f);
+
+            sprite.color = Color.Lerp(baseColor, c, t);
             yield return null;
         }
     }
