@@ -65,12 +65,19 @@ public class Scene : MonoBehaviour {
         maxGoodCollectibles = all.FindAll(x => x.collectType == Collectable.CollectType.Good).Count;
 
         outOfPlayzoneScript = FindObjectOfType<OutOfThePlayzone>();
-
+        outOfPlayzoneScript.timer.Timer.IntervalEvent += TimeOuthandler;
 	}
+
+    void TimeOuthandler(TimerThingy t, float time)
+    {
+        if (t.TimeLeft <= 0)
+        Scene.GlobalInstance.FinishStage(0);
+    }
 
     void OnDestroy()
     {
         timer.Timer.IntervalEvent -= this.TimerEventHandler;
+        outOfPlayzoneScript.timer.Timer.IntervalEvent -= TimeOuthandler;
     }
 
 
@@ -107,6 +114,7 @@ public class Scene : MonoBehaviour {
 
     public void TimerEventHandler(TimerThingy sender, float intervalTime)
     {
+        if (intervalTime != 0)
         FinishStage(timeLeft);
     }
 
@@ -117,7 +125,7 @@ public class Scene : MonoBehaviour {
         menuMgr.playScore.ResetScore();
         menuMgr.SetMenuVisiable(MenuMgr.MenuTypes.StageEndSucces);
         // Need Refactor on this
-        StartCoroutine( menuMgr.endScreenSucces.GetComponentInChildren<ScorringScreen>().ScoringRoutine(currentGoodCollectibles, currentBadCollectibles, timer.Timer.TimeLeft, GoodPoints, BadPoints, 10));
+        StartCoroutine( menuMgr.endScreenSucces.GetComponentInChildren<ScorringScreen>().ScoringRoutine(currentGoodCollectibles, currentBadCollectibles, finishTime, GoodPoints, BadPoints, 10));
     }
 
     public void SetOutsideTheTrack(bool value)

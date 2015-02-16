@@ -20,6 +20,7 @@ public class OutOfThePlayzone : MonoBehaviour
     void OnLevelWasLoaded()
     {
         SetEmergencyScreen(false);
+        
     }
 
     public void SetEmergencyScreen(bool value)
@@ -44,7 +45,13 @@ public class OutOfThePlayzone : MonoBehaviour
 	// Use this for initialization
 	void Start () {
         timer.countBack = true;
-        
+       
 	}
+
+   
+
+
+
+   
 	
 }

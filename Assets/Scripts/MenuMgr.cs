@@ -33,7 +33,7 @@ public class MenuMgr : MonoBehaviour {
     public Canvas mainC;
     public Canvas stageC;
     public Canvas inGameC;
-    public Canvas endStageC;
+    //public Canvas endStageC;
     public Canvas packSelectionC;
     public Canvas loadScreen;
     public Canvas endScreenSucces;
@@ -74,7 +74,7 @@ public class MenuMgr : MonoBehaviour {
 
         Object.DontDestroyOnLoad(this.gameObject);
 
-        allCanvases = new List<Canvas>() { mainC, stageC, inGameC, endStageC, packSelectionC, loadScreen, endScreenSucces};
+        allCanvases = new List<Canvas>() { mainC, stageC, inGameC, packSelectionC, loadScreen, endScreenSucces};
         foreach (Canvas c in allCanvases)
         {
             Object o = c.gameObject as Object;
