@@ -66,6 +66,9 @@ public class Scene : MonoBehaviour {
 
         outOfPlayzoneScript = FindObjectOfType<OutOfThePlayzone>();
         outOfPlayzoneScript.timer.Timer.IntervalEvent += TimeOuthandler;
+
+        menuMgr.inGameMenu.ShowMenu(false);
+
 	}
 
     void TimeOuthandler(TimerThingy t, float time)

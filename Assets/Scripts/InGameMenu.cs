@@ -34,6 +34,11 @@ public class InGameMenu : MonoBehaviour {
         loader.LoadMainMenu();
     }
 
+    void OnLevelWasLoaded()
+    {
+       
+    }
+
 	// Update is called once per frame
 	void Update () {
 	

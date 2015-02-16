@@ -64,7 +64,7 @@ public class StageLoader : MonoBehaviour {
         {
             yield return new WaitForEndOfFrame();
         }
-        yield return new WaitForSeconds(0.33f);
+        yield return new WaitForSeconds(0.4f);
         menuMgr.SetMenuVisiable(MenuMgr.MenuTypes.MainMenu);
         isLoading = false;
     }
