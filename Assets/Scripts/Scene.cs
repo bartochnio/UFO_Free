@@ -135,7 +135,6 @@ public class Scene : MonoBehaviour {
     {
         if (outOfPlayzoneScript != null)
             outOfPlayzoneScript.SetEmergencyScreen(value);
-        else Debug.LogError(name + " out of the playzone script is missing");
     }
 
     public void SetPause(bool value)

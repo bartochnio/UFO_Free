@@ -56,21 +56,24 @@ public class BezierSpline : MonoBehaviour {
         return points[index];
     }
 
-    public Vector2 GetClosestPointToACurve(int idx, Vector2 p)
+    //TODO: change the ref argument
+    public Vector2 GetClosestPointToACurve(int idx, Vector2 p, ref float t)
     {
         int steps = 8;
         Vector2 closest = new Vector2(Mathf.Infinity, Mathf.Infinity);
         Vector2 lineStart = GetCurvePoint(idx, 0.0f);
         for (int i = 1; i <= steps; ++i)
         {
-            float t = i / (float)steps;
+            t = i / (float)steps;
             Vector2 lineEnd = GetCurvePoint(idx, t);
 
             //Debug.DrawLine(lineStart, lineEnd, Color.cyan);
 
             Vector2 c = Utils.ClosestPoint(lineStart, lineEnd, p);
             if (Vector2.Distance(p, c) <= Vector2.Distance(p, closest))
+            {
                 closest = c;
+            }
 
             lineStart = lineEnd;
         }
@@ -80,11 +83,13 @@ public class BezierSpline : MonoBehaviour {
 
     public Vector2 GetClosestPoint(Vector2 p)
     {
+        float t = 0.0f;
+
         Array.Sort(curveBounds, (a, b) => a.bounds.SqrDistance(p) < b.bounds.SqrDistance(p) ? -1 : 1);
-        Vector2 closest = GetClosestPointToACurve(curveBounds[0].curveID, p);
+        Vector2 closest = GetClosestPointToACurve(curveBounds[0].curveID, p, ref t);
         for (int i = 1; i < 3; ++i)
         {
-            Vector2 c = GetClosestPointToACurve(curveBounds[i].curveID, p);
+            Vector2 c = GetClosestPointToACurve(curveBounds[i].curveID, p, ref t);
             if (Vector2.Distance(p, c) <= Vector2.Distance(p, closest))
                 closest = c;
         }
@@ -338,43 +343,9 @@ public class BezierSpline : MonoBehaviour {
     void GenerateMesh()
     {
         MeshBuilder builder = new MeshBuilder();
-
-        float progress = 0.0f;
-        float detail = 30.0f;
-        Vector3 lenDir, widthDir;
-        Vector3 normal = -Vector3.forward;
-
         for (int i = 0; i < CurveCount; ++i)
         {
-            float curveLen = GetCurveLength(i, 100);
-            Vector3 prevPos = GetCurvePoint(i, 0.0f);
-            float v = 0.0f;
-            for (int j = 0; j <= (int)detail; ++j)
-            {
-                progress = j / detail;
-                Vector3 pos = GetCurvePoint(i,progress);
-                widthDir = this.GetCurveVelocity(i,progress).normalized;
-                lenDir = Vector3.Cross(widthDir, -Vector3.forward).normalized * 0.5f;
-
-                v += Vector2.Distance(pos, prevPos) / curveLen;
-                v = Mathf.Clamp01(v);
-
-                builder.PushVert(transform.InverseTransformPoint(pos - lenDir * meshWidth));
-                builder.PushNormal(normal);
-                builder.PushUV(new Vector2(0.0f, v));
-
-                builder.PushVert(transform.InverseTransformPoint(pos + lenDir * meshWidth));
-                builder.PushNormal(normal);
-                builder.PushUV(new Vector2(1.0f, v));
-                
-                prevPos = pos;
-                if (!(j == 0 && i == 0))
-                {
-                    int baseIndex = builder.vertices.Count - 4;
-                    builder.AddTriangle(baseIndex, baseIndex + 1, baseIndex + 2);
-                    builder.AddTriangle(baseIndex + 2, baseIndex + 1, baseIndex + 3);
-                }
-            }
+            GenerateCurveMesh(i, builder);
         }
 
         Mesh mesh = builder.CreateMesh();
@@ -383,5 +354,42 @@ public class BezierSpline : MonoBehaviour {
         {
             filter.sharedMesh = mesh;
         }
+    }
+
+    void GenerateCurveMesh(int index, MeshBuilder builder)
+    {
+        float curveLen = GetCurveLength(index, 100);
+        Vector3 prevPos = GetCurvePoint(index, 0.0f);
+        int detail = 30;
+        float v = 0.0f;
+        Vector3 lenDir, widthDir;
+        Vector3 normal = -Vector3.forward;
+
+        for (int j = 0; j <= detail; ++j)
+        {
+            float progress = (float)j / (float)detail;
+            Vector3 pos = GetCurvePoint(index, progress);
+            widthDir = this.GetCurveVelocity(index, progress).normalized;
+            lenDir = Vector3.Cross(widthDir, -Vector3.forward).normalized * 0.5f;
+
+            v += Vector2.Distance(pos, prevPos) / curveLen;
+            v = Mathf.Clamp01(v);
+
+            builder.PushVert(transform.InverseTransformPoint(pos - lenDir * meshWidth));
+            builder.PushNormal(normal);
+            builder.PushUV(new Vector2(0.0f, v));
+
+            builder.PushVert(transform.InverseTransformPoint(pos + lenDir * meshWidth));
+            builder.PushNormal(normal);
+            builder.PushUV(new Vector2(1.0f, v));
+
+            prevPos = pos;
+            if (j != 0)
+            {
+                int baseIndex = builder.vertices.Count - 4;
+                builder.AddTriangle(baseIndex, baseIndex + 1, baseIndex + 2);
+                builder.AddTriangle(baseIndex + 2, baseIndex + 1, baseIndex + 3);
+            }
+        }   
     }
 }

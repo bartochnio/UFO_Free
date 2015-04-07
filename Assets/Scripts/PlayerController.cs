@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour {
     private GameObject curItem = null;
     private List<GameObject> items = new List<GameObject>();
 
-    
+    int curveIndex = 0;
 
     public void Respawn()
     {
@@ -40,12 +40,39 @@ public class PlayerController : MonoBehaviour {
         	CollectItem();
 		}
 
+        float t = 0.0f;
+        Vector2 closestPoint = track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
+        Vector2 end = track.GetCurvePoint(curveIndex, 1.0f);
+        Vector2 start = track.GetCurvePoint(curveIndex, 0.0f);
 
-        //counter -= Time.deltaTime;
-        //if (counter <= 0.0f)
-           // Scene.GlobalInstance.FinishStage(0.0f);
+       // Vector2 curveTangent = track.GetCurveVelocity(curveIndex, t).normalized;
 
-       
+        if (Vector2.Distance(end, closestPoint) < 0.6f)
+        {
+            curveIndex = (curveIndex + 1) % track.CurveCount;
+        }
+        else if (Vector2.Distance(start, closestPoint) < 0.6f)
+        {
+            if (curveIndex == 0)
+                curveIndex = track.CurveCount - 1;
+            else
+                curveIndex = curveIndex - 1;
+        }
+
+
+       //Direction check
+       // if (velocity.sqrMagnitude > 0.0001f)
+       // {
+       //     float p = Vector2.Dot(velocity.normalized, curveTangent);
+
+       //     if (p < -0.2)
+       //     {
+       //         Debug.DrawLine(transform.position, (Vector2)transform.position + velocity.normalized, Color.blue);
+       //         Debug.DrawLine(transform.position, (Vector2)transform.position + curveTangent, Color.cyan);
+       //     }
+       // }
+
+       //Debug.DrawLine(transform.position, closestPoint, Color.red);
 	}
 
     void ShowArrow()
@@ -57,8 +84,9 @@ public class PlayerController : MonoBehaviour {
             return;
         }
 
-        Vector3 closestPoint = track.GetClosestPoint(transform.position);
-        Vector2 dir = (closestPoint - transform.position).normalized;
+        float t = 0.0f;
+        Vector2 closestPoint = track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
+        Vector2 dir = (closestPoint - (Vector2)transform.position).normalized;
         float angle = Mathf.Rad2Deg * Mathf.Atan2(dir.y, dir.x);
 
         arrow.transform.localPosition = Vector3.zero;
