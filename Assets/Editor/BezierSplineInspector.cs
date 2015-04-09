@@ -17,7 +17,6 @@ public class BezierSplineInspector : Editor
     void OnEnable()
     {
         spline = target as BezierSpline;
-        spline.OnSpawn();
     }
 
     public override void OnInspectorGUI()
