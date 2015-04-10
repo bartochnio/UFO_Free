@@ -47,4 +47,12 @@ public class MeshBuilder
         mesh.RecalculateBounds();
         return mesh;
     }
+
+    public void Clear()
+    {
+        vertices.Clear();
+        indices.Clear();
+        uvs.Clear();
+        normals.Clear();
+    }
 }

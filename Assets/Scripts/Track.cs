@@ -5,34 +5,53 @@ using System.Collections.Generic;
 public class Track : MonoBehaviour {
 
     BezierSpline spline;
+    GameObject[] meshGOs;
+    Material material;
 
 	void Start () 
     {
         spline = GetComponent<BezierSpline>();
         GenerateMesh();
         GenerateCollider();
-	}
-	
-	void Update () 
+    }
+
+    void Update() 
     {
 	
 	}
 
     void GenerateMesh()
     {
+        material = GetComponent<MeshRenderer>().material;
+
+        meshGOs = new GameObject[spline.CurveCount];
+
         MeshBuilder builder = new MeshBuilder();
         for (int i = 0; i < spline.CurveCount; ++i)
         {
+            meshGOs[i] = new GameObject("Curve_" + i);
+            meshGOs[i].transform.SetParent(transform);
+            MeshRenderer meshRenderer = meshGOs[i].AddComponent<MeshRenderer>();
+            MeshFilter filter = meshGOs[i].AddComponent<MeshFilter>();
+
             GenerateCurveMesh(i, builder);
-        }
 
-        Mesh mesh = builder.CreateMesh();
-
-        MeshFilter filter = GetComponent<MeshFilter>();
-        if (filter != null)
-        {
+            Mesh mesh = builder.CreateMesh();
             filter.sharedMesh = mesh;
+            meshRenderer.material = material;
+
+            meshGOs[i].tag = "Track";
+
+            builder.Clear();
         }
+    }
+
+
+    void ChangeCurveAlpha(int index, float alpha)
+    {
+        Color color = Color.red;
+        color.a = alpha;
+        meshGOs[index].GetComponent<MeshRenderer>().material.SetColor("_Color", color);
     }
 
     void GenerateCurveMesh(int index, MeshBuilder builder)
@@ -74,23 +93,27 @@ public class Track : MonoBehaviour {
 
     void GenerateCollider()
     {
-        MeshFilter filter = GetComponent<MeshFilter>();
-        PolygonCollider2D collider = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
-        Vector3[] verts = filter.sharedMesh.vertices;
         List<Vector2> points = new List<Vector2>();
-
-        for (int i = 0; i < verts.Length; ++i)
+        for(int i = 0; i < spline.CurveCount; ++i)
         {
-            if (i % 2 == 0)
-                points.Add(verts[i]);
-        }
+            MeshFilter filter = meshGOs[i].GetComponent<MeshFilter>();
+            PolygonCollider2D collider = meshGOs[i].AddComponent<PolygonCollider2D>() as PolygonCollider2D;
+            Vector3[] verts = filter.sharedMesh.vertices;
 
-        for (int i = verts.Length - 1; i > 0; --i)
-        {
-            if (i % 2 != 0)
-                points.Add(verts[i]);
-        }
+            for (int j = 0; j < verts.Length; ++j)
+            {
+                if (j % 2 == 0)
+                    points.Add(verts[j]);
+            }
 
-        collider.points = points.ToArray();
+            for (int j = verts.Length - 1; j > 0; --j)
+            {
+                if (j % 2 != 0)
+                    points.Add(verts[j]);
+            }
+
+            collider.points = points.ToArray();
+            points.Clear();
+        }
     }
 }
