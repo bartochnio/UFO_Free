@@ -9,11 +9,9 @@ public class CollectableSpawner : MonoBehaviour {
     public float radiusBias = 0.1f;
     public GameObject collectable;
     public int points;
-     private Collectable[] collectables;
+    private Collectable[] collectables;
 
-     void Awake() { Spawn(); }
-
-   
+    void Awake() { Spawn(); }
 
 	void Start ()   {
         
@@ -50,6 +48,8 @@ public class CollectableSpawner : MonoBehaviour {
                 Collectable c = go.GetComponent<Collectable>();
 
                 collectables[i] = c;
+                c.Spline = track;
+                c.startT = t;
                 c.collectType = (Collectable.CollectType)(Random.Range(0, 2));
                 go.transform.position = newPos;
             }

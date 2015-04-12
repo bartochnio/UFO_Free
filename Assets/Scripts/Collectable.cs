@@ -3,6 +3,9 @@ using System.Collections;
 
 public class Collectable : MonoBehaviour {
 
+    public float startT = 0.0f;
+    public float direction = -1.0f;
+
     public enum CollectType
     {
         Good,
@@ -43,6 +46,13 @@ public class Collectable : MonoBehaviour {
     private CircleCollider2D circle;
     private Color baseColor;
     private Transform target;
+    private BezierSpline spline;
+    private float curT = 0.0f;
+
+    public BezierSpline Spline
+    {
+        set { spline = value; }
+    }
 
     void Awake()
     {
@@ -59,11 +69,26 @@ public class Collectable : MonoBehaviour {
 
         sprite.color = baseColor;
         state = State.idle;
+        curT = startT;
 	}
 	
 	void Update () 
     {
+        if (state == State.idle || state == State.flash)
+        {
+            curT += (Time.deltaTime / 200.0f)*direction;
+            if (curT >= 1.0f)
+                curT = 0.0f;
+            else if (curT <= 0.0f)
+                curT = 1.0f;
 
+            transform.position = spline.GetPoint(curT);
+
+            Vector2 vel = spline.GetVelocity(curT);
+            float angle = Mathf.Rad2Deg * Mathf.Atan2(vel.y, vel.x);
+            Quaternion rot = Quaternion.Euler(new Vector3(0.0f,0.0f,angle));
+            transform.rotation = rot;
+        }
 	}
 
     IEnumerator Beam()
