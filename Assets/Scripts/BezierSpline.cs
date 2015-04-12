@@ -274,10 +274,10 @@ public class BezierSpline : MonoBehaviour {
 
         float result = 0.0f;
 
-        Vector2 lineStart = p0;
+        Vector2 lineStart = transform.TransformPoint(p0);
         for (int i = 1; i <= lineStep; ++i)
         {
-            Vector2 lineEnd = Bezier.GetPoint(p0, p1, p2, p3, i / (float)lineStep);
+            Vector2 lineEnd = transform.TransformPoint(Bezier.GetPoint(p0, p1, p2, p3, i / (float)lineStep));
             result += Vector2.Distance(lineStart, lineEnd);
             lineStart = lineEnd;
         }

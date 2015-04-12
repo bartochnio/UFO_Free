@@ -21,7 +21,8 @@ public class PlayerController : MonoBehaviour {
 
     public void Respawn()
     {
-        transform.position = track.GetPoint(0.0f);
+        transform.position = track.GetCurvePoint(curveIndex, 0.5f);
+        curveIndex = 0;
     }
 
 	void Start () 
@@ -29,6 +30,10 @@ public class PlayerController : MonoBehaviour {
         Respawn();
         arrow = transform.FindChild("Arrow").gameObject; //UNSAFE
         arrowSprite = arrow.GetComponent<SpriteRenderer>();
+
+        UpdateTrackVisibility(curveIndex);
+        //track.gameObject.SendMessage("DisableTrack");
+        //track.gameObject.SendMessage("EnableCurve", curveIndex);
 	}
 	
 	void Update () 
@@ -39,41 +44,26 @@ public class PlayerController : MonoBehaviour {
 		if (Input.GetButtonDown("Jump")) {
         	CollectItem();
 		}
-
-        float t = 0.0f;
-        Vector2 closestPoint = track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
-        Vector2 end = track.GetCurvePoint(curveIndex, 1.0f);
-        Vector2 start = track.GetCurvePoint(curveIndex, 0.0f);
-
-       // Vector2 curveTangent = track.GetCurveVelocity(curveIndex, t).normalized;
-
-        if (Vector2.Distance(end, closestPoint) < 0.6f)
-        {
-            curveIndex = (curveIndex + 1) % track.CurveCount;
-        }
-        else if (Vector2.Distance(start, closestPoint) < 0.6f)
-        {
-            if (curveIndex == 0)
-                curveIndex = track.CurveCount - 1;
-            else
-                curveIndex = curveIndex - 1;
-        }
-
-
-       //Direction check
-       // if (velocity.sqrMagnitude > 0.0001f)
-       // {
-       //     float p = Vector2.Dot(velocity.normalized, curveTangent);
-
-       //     if (p < -0.2)
-       //     {
-       //         Debug.DrawLine(transform.position, (Vector2)transform.position + velocity.normalized, Color.blue);
-       //         Debug.DrawLine(transform.position, (Vector2)transform.position + curveTangent, Color.cyan);
-       //     }
-       // }
-
-       //Debug.DrawLine(transform.position, closestPoint, Color.red);
 	}
+
+    void UpdateTrackVisibility(int index)
+    {
+        track.SendMessage("DisableTrack");
+
+        curveIndex = index;
+        int nextIndex = curveIndex;
+        nextIndex = (curveIndex+1) % track.CurveCount;
+
+        int prevIndex = curveIndex;
+        if (curveIndex > 0)
+            prevIndex = curveIndex - 1;
+        else
+            prevIndex = track.CurveCount - 1;
+
+        track.SendMessage("EnableCurve", prevIndex);
+        track.SendMessage("EnableCurve", curveIndex);
+        track.SendMessage("EnableCurve", nextIndex);
+    }
 
     void ShowArrow()
     {
@@ -151,15 +141,30 @@ public class PlayerController : MonoBehaviour {
             curItem.SendMessage("SetFlash");
             items.Add(curItem);
         }
+        else if (other.tag == "Track")
+        {
+            int index = int.Parse(other.gameObject.name);
+
+            if ((Mathf.Abs(index - curveIndex) == 1))
+                UpdateTrackVisibility(index);
+            else if (curveIndex == 0 && (index == track.CurveCount - 1))
+                UpdateTrackVisibility(index);
+            else if ((curveIndex == track.CurveCount - 1) && index == 0)
+                UpdateTrackVisibility(index);
+        }
     }
     
     void OnTriggerStay2D(Collider2D other) 
     {
-        if (other.tag == "Track")
-            
+        if (other.tag == "Track") 
         {
-            Scene.GlobalInstance.SetOutsideTheTrack(false);
-            isOutside = false;
+            int index = int.Parse(other.gameObject.name);
+
+            if (index == curveIndex)
+            {
+                Scene.GlobalInstance.SetOutsideTheTrack(false);
+                isOutside = false;
+            }
         }
     }
 
@@ -167,8 +172,14 @@ public class PlayerController : MonoBehaviour {
     {
         if (other.tag == "Track")
         {
-            Scene.GlobalInstance.SetOutsideTheTrack(true);
-            isOutside = true;
+            int index = int.Parse(other.gameObject.name);
+
+            if (index == curveIndex)
+            {
+                isOutside = true;
+                Scene.GlobalInstance.SetOutsideTheTrack(true);
+            }
+            
         }
         else if(other.tag == "Collectable")
         {

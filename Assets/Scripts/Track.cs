@@ -29,7 +29,7 @@ public class Track : MonoBehaviour {
         MeshBuilder builder = new MeshBuilder();
         for (int i = 0; i < spline.CurveCount; ++i)
         {
-            meshGOs[i] = new GameObject("Curve_" + i);
+            meshGOs[i] = new GameObject(i.ToString());
             meshGOs[i].transform.SetParent(transform);
             MeshRenderer meshRenderer = meshGOs[i].AddComponent<MeshRenderer>();
             MeshFilter filter = meshGOs[i].AddComponent<MeshFilter>();
@@ -44,14 +44,6 @@ public class Track : MonoBehaviour {
 
             builder.Clear();
         }
-    }
-
-
-    void ChangeCurveAlpha(int index, float alpha)
-    {
-        Color color = Color.red;
-        color.a = alpha;
-        meshGOs[index].GetComponent<MeshRenderer>().material.SetColor("_Color", color);
     }
 
     void GenerateCurveMesh(int index, MeshBuilder builder)
@@ -73,11 +65,11 @@ public class Track : MonoBehaviour {
             v += Vector2.Distance(pos, prevPos) / curveLen;
             v = Mathf.Clamp01(v);
 
-            builder.PushVert(transform.InverseTransformPoint(pos - lenDir * spline.Width));
+            builder.PushVert((pos - lenDir * spline.Width));
             builder.PushNormal(normal);
             builder.PushUV(new Vector2(0.0f, v));
 
-            builder.PushVert(transform.InverseTransformPoint(pos + lenDir * spline.Width));
+            builder.PushVert((pos + lenDir * spline.Width));
             builder.PushNormal(normal);
             builder.PushUV(new Vector2(1.0f, v));
 
@@ -114,6 +106,25 @@ public class Track : MonoBehaviour {
 
             collider.points = points.ToArray();
             points.Clear();
+        }
+    }
+
+    //Messages
+    void EnableCurve(int index)
+    {
+        meshGOs[index].GetComponent<MeshRenderer>().enabled = true;
+    }
+
+    void DisableCurve(int index)
+    {
+        meshGOs[index].GetComponent<MeshRenderer>().enabled = false;
+    }
+    
+    void DisableTrack()
+    {
+        for (int i = 0; i < spline.CurveCount; ++i)
+        {
+            meshGOs[i].GetComponent<MeshRenderer>().enabled = false;
         }
     }
 }
