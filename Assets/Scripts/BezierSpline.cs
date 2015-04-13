@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class BezierSpline : MonoBehaviour {
 
     [SerializeField]
-    private Vector2[] points;
+    private Vector3[] points;
 
     [SerializeField]
     private bool loop;
@@ -49,26 +49,26 @@ public class BezierSpline : MonoBehaviour {
         get { return points.Length; }
     }
 
-    public Vector2 GetControlPoint(int index)
+    public Vector3 GetControlPoint(int index)
     {
         return points[index];
     }
 
     //TODO: change the ref argument
-    public Vector2 GetClosestPointToACurve(int idx, Vector2 p, ref float t)
+    public Vector3 GetClosestPointToACurve(int idx, Vector3 p, ref float t)
     {
         int steps = 8;
-        Vector2 closest = new Vector2(Mathf.Infinity, Mathf.Infinity);
-        Vector2 lineStart = GetCurvePoint(idx, 0.0f);
+        Vector3 closest = new Vector3(Mathf.Infinity, Mathf.Infinity);
+        Vector3 lineStart = GetCurvePoint(idx, 0.0f);
         for (int i = 1; i <= steps; ++i)
         {
             t = i / (float)steps;
-            Vector2 lineEnd = GetCurvePoint(idx, t);
+            Vector3 lineEnd = GetCurvePoint(idx, t);
 
             //Debug.DrawLine(lineStart, lineEnd, Color.cyan);
 
-            Vector2 c = Utils.ClosestPoint(lineStart, lineEnd, p);
-            if (Vector2.Distance(p, c) <= Vector2.Distance(p, closest))
+            Vector3 c = Utils.ClosestPoint(lineStart, lineEnd, p);
+            if (Vector3.Distance(p, c) <= Vector3.Distance(p, closest))
             {
                 closest = c;
             }
@@ -79,27 +79,27 @@ public class BezierSpline : MonoBehaviour {
         return closest;
     }
 
-    public Vector2 GetClosestPoint(Vector2 p)
+    public Vector3 GetClosestPoint(Vector3 p)
     {
         float t = 0.0f;
 
         Array.Sort(curveBounds, (a, b) => a.bounds.SqrDistance(p) < b.bounds.SqrDistance(p) ? -1 : 1);
-        Vector2 closest = GetClosestPointToACurve(curveBounds[0].curveID, p, ref t);
+        Vector3 closest = GetClosestPointToACurve(curveBounds[0].curveID, p, ref t);
         for (int i = 1; i < 3; ++i)
         {
-            Vector2 c = GetClosestPointToACurve(curveBounds[i].curveID, p, ref t);
-            if (Vector2.Distance(p, c) <= Vector2.Distance(p, closest))
+            Vector3 c = GetClosestPointToACurve(curveBounds[i].curveID, p, ref t);
+            if (Vector3.Distance(p, c) <= Vector3.Distance(p, closest))
                 closest = c;
         }
 
         return closest;
     }
 
-    public void SetControlPoint(int index, Vector2 point)
+    public void SetControlPoint(int index, Vector3 point)
     {
         if (index % 3 == 0)
         {
-            Vector2 delta = point - points[index];
+            Vector3 delta = point - points[index];
             if (loop)
             {
                 if (index == 0)
@@ -163,8 +163,8 @@ public class BezierSpline : MonoBehaviour {
                 enforcedIndex = points.Length - 2;
         }
 
-        Vector2 middle = points[middleIndex];
-        Vector2 enforcedTangent = middle - points[fixedIndex];
+        Vector3 middle = points[middleIndex];
+        Vector3 enforcedTangent = middle - points[fixedIndex];
         points[enforcedIndex] = middle + enforcedTangent;
     }
 
@@ -173,7 +173,7 @@ public class BezierSpline : MonoBehaviour {
         get { return (points.Length - 1) / 3; }
     }
 
-    public Vector2 GetPoint(float t)
+    public Vector3 GetPoint(float t)
     {
         int i;
         if (t >= 1.0f)
@@ -192,24 +192,24 @@ public class BezierSpline : MonoBehaviour {
         return transform.TransformPoint(Bezier.GetPoint(points[i], points[i + 1], points[i + 2], points[i + 3], t));
     }
 
-    public Vector2 GetCurvePoint(int index, float t)
+    public Vector3 GetCurvePoint(int index, float t)
     {
         int idx = index * 3;
-        Vector2 p0 = points[idx];
-        Vector2 p1 = points[idx + 1];
-        Vector2 p2 = points[idx + 2];
-        Vector2 p3 = points[idx + 3];
+        Vector3 p0 = points[idx];
+        Vector3 p1 = points[idx + 1];
+        Vector3 p2 = points[idx + 2];
+        Vector3 p3 = points[idx + 3];
 
         return transform.TransformPoint(Bezier.GetPoint(p0, p1, p2, p3, t));
     }
 
-    public Vector2 GetCurveVelocity(int index, float t)
+    public Vector3 GetCurveVelocity(int index, float t)
     {
         int idx = index * 3;
-        Vector2 p0 = points[idx];
-        Vector2 p1 = points[idx + 1];
-        Vector2 p2 = points[idx + 2];
-        Vector2 p3 = points[idx + 3];
+        Vector3 p0 = points[idx];
+        Vector3 p1 = points[idx + 1];
+        Vector3 p2 = points[idx + 2];
+        Vector3 p3 = points[idx + 3];
 
         return  transform.TransformPoint(Bezier.GetTangent(p0, p1, p2, p3, t)) - transform.position;
     }
@@ -234,7 +234,7 @@ public class BezierSpline : MonoBehaviour {
 
     public void AddCurve()
     {
-        Vector2 point = points[points.Length - 1];
+        Vector3 point = points[points.Length - 1];
         Array.Resize(ref points, points.Length + 3);
 
         point.x += 4.0f;
@@ -255,30 +255,30 @@ public class BezierSpline : MonoBehaviour {
 
     public void Reset()
     {
-        points = new Vector2[]
+        points = new Vector3[]
         {
-            new Vector2(1.0f,0.0f),
-            new Vector2(5.0f,0.0f),
-            new Vector2(9.0f,0.0f),
-            new Vector2(13.0f,0.0f),
+            new Vector3(1.0f,0.0f,0.0f),
+            new Vector3(5.0f,0.0f,0.0f),
+            new Vector3(9.0f,0.0f,0.0f),
+            new Vector3(13.0f,0.0f,0.0f),
         };
     }
 
     public float GetCurveLength(int index, int lineStep)
     {
         int idx = index * 3;
-        Vector2 p0 = points[idx];
-        Vector2 p1 = points[idx + 1];
-        Vector2 p2 = points[idx + 2];
-        Vector2 p3 = points[idx + 3];
+        Vector3 p0 = points[idx];
+        Vector3 p1 = points[idx + 1];
+        Vector3 p2 = points[idx + 2];
+        Vector3 p3 = points[idx + 3];
 
         float result = 0.0f;
 
-        Vector2 lineStart = transform.TransformPoint(p0);
+        Vector3 lineStart = transform.TransformPoint(p0);
         for (int i = 1; i <= lineStep; ++i)
         {
-            Vector2 lineEnd = transform.TransformPoint(Bezier.GetPoint(p0, p1, p2, p3, i / (float)lineStep));
-            result += Vector2.Distance(lineStart, lineEnd);
+            Vector3 lineEnd = transform.TransformPoint(Bezier.GetPoint(p0, p1, p2, p3, i / (float)lineStep));
+            result += Vector3.Distance(lineStart, lineEnd);
             lineStart = lineEnd;
         }
 

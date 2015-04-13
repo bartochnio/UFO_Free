@@ -52,7 +52,7 @@ public class PlayerController : MonoBehaviour {
 
         curveIndex = index;
         int nextIndex = curveIndex;
-        nextIndex = (curveIndex+1) % track.CurveCount;
+        nextIndex = (curveIndex + 1) % track.CurveCount;
 
         int prevIndex = curveIndex;
         if (curveIndex > 0)

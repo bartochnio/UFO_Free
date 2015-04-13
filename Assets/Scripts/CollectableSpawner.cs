@@ -23,10 +23,10 @@ public class CollectableSpawner : MonoBehaviour {
         for (int i = 0; i < amount; ++i)
         {
             float t = i / (float)amount;
-            Vector2 side = Vector3.Cross(track.GetVelocity(t).normalized, -Vector3.forward).normalized;
+            Vector3 side = Vector3.Cross(track.GetVelocity(t).normalized, -Vector3.forward).normalized;
             side *= Random.Range(-diff, diff);
 
-            Vector2 newPos = track.GetPoint(t) + side;
+            Vector3 newPos = track.GetPoint(t) + side;
 
             bool collided = false;
             foreach (Collectable other in collectables)
