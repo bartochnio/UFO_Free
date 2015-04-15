@@ -4,6 +4,7 @@ using System.Collections;
 public class CollectableSpawner : MonoBehaviour {
 
     public BezierSpline track;
+    public PlayerController player;
     public int amount;
     public float diff;
     public float radiusBias = 0.1f;
@@ -49,6 +50,7 @@ public class CollectableSpawner : MonoBehaviour {
 
                 collectables[i] = c;
                 c.Spline = track;
+                c.Player = player;
                 c.startT = t;
                 c.collectType = (Collectable.CollectType)(Random.Range(0, 2));
                 go.transform.position = newPos;

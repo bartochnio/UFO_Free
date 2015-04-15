@@ -47,11 +47,17 @@ public class Collectable : MonoBehaviour {
     private Color baseColor;
     private Transform target;
     private BezierSpline spline;
+    private PlayerController player;
     private float curT = 0.0f;
 
     public BezierSpline Spline
     {
         set { spline = value; }
+    }
+
+    public PlayerController Player
+    {
+        set { player = value; }
     }
 
     void Awake()
