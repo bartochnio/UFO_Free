@@ -18,6 +18,22 @@ public class PlayerController : MonoBehaviour {
     private List<GameObject> items = new List<GameObject>();
 
     int curveIndex = 0;
+    public int CurveIndex
+    {
+        get { return curveIndex; }
+    }
+
+    int nextIndex = 0;
+    public int NextIndex
+    {
+        get { return nextIndex; }
+    }
+
+    int prevIndex = 0;
+    public int PrevIndex
+    {
+        get { return prevIndex; }
+    }
 
     public void Respawn()
     {
@@ -48,13 +64,13 @@ public class PlayerController : MonoBehaviour {
 
     void UpdateTrackVisibility(int index)
     {
-        track.SendMessage("DisableTrack");
+        //track.SendMessage("DisableTrack");
 
         curveIndex = index;
-        int nextIndex = curveIndex;
-        nextIndex = (curveIndex+1) % track.CurveCount;
+        nextIndex = curveIndex;
+        nextIndex = (curveIndex + 1) % track.CurveCount;
 
-        int prevIndex = curveIndex;
+        prevIndex = curveIndex;
         if (curveIndex > 0)
             prevIndex = curveIndex - 1;
         else
@@ -151,6 +167,9 @@ public class PlayerController : MonoBehaviour {
                 UpdateTrackVisibility(index);
             else if ((curveIndex == track.CurveCount - 1) && index == 0)
                 UpdateTrackVisibility(index);
+            
+            else if (index != curveIndex)
+                track.SendMessage("DisableCurve", index);
         }
     }
     
@@ -179,6 +198,8 @@ public class PlayerController : MonoBehaviour {
                 isOutside = true;
                 Scene.GlobalInstance.SetOutsideTheTrack(true);
             }
+
+            track.SendMessage("EnableCurve", index);
             
         }
         else if(other.tag == "Collectable")

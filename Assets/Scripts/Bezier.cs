@@ -3,7 +3,7 @@ using System.Collections;
 
 public static class Bezier
 {
-    public static Vector2 GetPoint(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
+    public static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
     {
         t = Mathf.Clamp01(t);
 
@@ -17,7 +17,7 @@ public static class Bezier
     }
 
     //WARNING: not normalized
-    public static Vector2 GetTangent(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
+    public static Vector3 GetTangent(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
     {
         t = Mathf.Clamp01(t);
 

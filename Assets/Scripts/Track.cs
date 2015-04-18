@@ -20,6 +20,13 @@ public class Track : MonoBehaviour {
 	
 	}
 
+    void ChangeCurveAlpha(int index, float alpha)
+    {
+        Color color = Color.white;
+        color.a = alpha;
+        meshGOs[index].GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+    }
+
     void GenerateMesh()
     {
         material = GetComponent<MeshRenderer>().material;
@@ -112,19 +119,24 @@ public class Track : MonoBehaviour {
     //Messages
     void EnableCurve(int index)
     {
-        meshGOs[index].GetComponent<MeshRenderer>().enabled = true;
+        //meshGOs[index].GetComponent<MeshRenderer>().enabled = true;
+
+        ChangeCurveAlpha(index, 1.0f);
     }
 
     void DisableCurve(int index)
     {
-        meshGOs[index].GetComponent<MeshRenderer>().enabled = false;
+        //meshGOs[index].GetComponent<MeshRenderer>().enabled = false;
+
+        ChangeCurveAlpha(index, 0.2f);
     }
     
     void DisableTrack()
     {
         for (int i = 0; i < spline.CurveCount; ++i)
         {
-            meshGOs[i].GetComponent<MeshRenderer>().enabled = false;
+            DisableCurve(i);
+            //meshGOs[i].GetComponent<MeshRenderer>().enabled = false;
         }
     }
 }
