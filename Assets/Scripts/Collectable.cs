@@ -5,6 +5,8 @@ public class Collectable : MonoBehaviour {
 
     public float startT = 0.0f;
     public float direction = -1.0f;
+    private int myIdx = 0;
+
 
     public enum CollectType
     {
@@ -64,9 +66,10 @@ public class Collectable : MonoBehaviour {
     {
         sprite = gameObject.GetComponent<SpriteRenderer>();
         circle = gameObject.GetComponent<CircleCollider2D>();
+
     }
 
-	void Start () 
+	IEnumerator Start () 
     {
         if (collectType == CollectType.Good)
             baseColor = Color.green * RenderSettings.ambientLight;
@@ -76,6 +79,17 @@ public class Collectable : MonoBehaviour {
         sprite.color = baseColor;
         state = State.idle;
         curT = startT;
+
+        PlayerController ctrl = null;
+
+        while (ctrl == null)
+        {
+            ctrl = GameObject.FindObjectOfType<PlayerController>();
+            yield return new WaitForEndOfFrame();
+        }
+
+        ctrl.TrackIndexChanged += this.TrackPartChangedHandler;
+      
 	}
 	
 	void Update () 
@@ -159,5 +173,79 @@ public class Collectable : MonoBehaviour {
         target = trg;
         StopAllCoroutines();
         StartCoroutine("Beam");
+    }
+    bool firstSet = true;
+    void OnTriggerEnter2D(Collider2D c)
+    {
+        if (c.tag == "Track")
+        {
+            PlayerController pc = FindObjectOfType<PlayerController>();
+
+            int idx = int.Parse(c.name);
+            int low = myIdx - 1;
+            if (low == -1) low = pc.track.CurveCount;
+            int high = myIdx + 1;
+            if (high > pc.track.CurveCount) high = 0;
+
+            if (idx != myIdx )
+            {
+                if (firstSet)
+                {
+                     myIdx = idx;
+                    Debug.Log(name + " Moved to IDX " + idx);
+                   
+                    int cur = pc.CurveIndex;
+                    int p = pc.PrevIndex;
+                    int n = pc.NextIndex;
+                    TrackPartChangedHandler(cur, p, n);
+                    firstSet = false;
+                }
+                else if ( (idx == high || idx == low))
+                {
+                   
+                    {
+                        myIdx = idx;
+                        Debug.Log(name + " Moved to IDX " + idx);
+                       
+                        int cur = pc.CurveIndex;
+                        int p = pc.PrevIndex;
+                        int n = pc.NextIndex;
+                        TrackPartChangedHandler(cur, p, n);
+                    }
+                }
+                
+            }
+        }
+    }
+    bool isVisible = true;
+
+    void TrackPartChangedHandler(int idx, int prvIdx, int nextIdx)
+    {
+        if (idx == myIdx || prvIdx == myIdx ||  nextIdx == myIdx )
+        {
+            if (!this.isVisible)
+            {
+                this.isVisible = true;
+                Color color = Color.white;
+                color.a = 1f;
+                GetComponent<SpriteRenderer>().material.SetColor("_Color", color);
+            }
+        }
+        else
+        {
+            if (this.isVisible)
+            {
+                this.isVisible = false;
+                Color c = Color.white;
+                c.a = 0.0f;
+                GetComponent<SpriteRenderer>().material.SetColor("_Color", c);
+            }
+        }
+    }
+    
+    void OnDestroy()
+    {
+        PlayerController c = GameObject.FindObjectOfType<PlayerController>();
+        c.TrackIndexChanged -= this.TrackPartChangedHandler;
     }
 }
