@@ -17,7 +17,7 @@ public class VirtualPad : MonoBehaviour {
 	Vector2 DPadOriginalAnchorMin; // anchorMin of the DPad UI button
 	Vector2 DPadOriginalAnchorMax; // anchorMax of the DPad UI button
 	Vector2 DPadBtnOriginalPosition; // original position of the DPad button in pixel coords
-	Vector3 DPadManipStartPosition; // pixel coords of the touch/mouse (depending on bTouched flag) before virtual DPad is moevd (just touched)
+	Vector3 DPadManipStartPosition; // pixel coords of the touch/mouse (depending on bTouched flag) before virtual DPad is moved (just touched)
 	Vector3 DPadManipCurrentPosition; // pixel coords of the touch/mouse (depending on bTouched flag) current position
 	bool	bTouched; // true = virtual DPad is bein manipulated with touchscreen. false = being manipulated with mouse.
 	int     DPadManipTouchID; // ID of the finger which touched the virtual DPad
@@ -52,7 +52,7 @@ public class VirtualPad : MonoBehaviour {
 		velocity.x = Input.GetAxis("Horizontal");
 		velocity.y = Input.GetAxis("Vertical");
 
-		if (bManipulateDPad) { // if virtual DPad is beinf manipulated
+		if (bManipulateDPad) { // if virtual DPad is being manipulated
 			if (false == bTouched) { // with mouse ?
 				DPadManipCurrentPosition = Input.mousePosition;
 			}
