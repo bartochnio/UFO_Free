@@ -170,6 +170,8 @@ public class PlayerController : MonoBehaviour {
             
             else if (index != curveIndex)
                 track.SendMessage("DisableCurve", index);
+
+            if (TrackIndexChanged != null) TrackIndexChanged(curveIndex, nextIndex, PrevIndex); 
         }
     }
     
@@ -201,6 +203,7 @@ public class PlayerController : MonoBehaviour {
 
             track.SendMessage("EnableCurve", index);
             
+            
         }
         else if(other.tag == "Collectable")
         {
@@ -214,4 +217,7 @@ public class PlayerController : MonoBehaviour {
                 items.Remove(other.gameObject);
         }
     }
+
+    public delegate void TrackPartChangeDelegate(int currentIdx,int preIdx, int nextIdx);
+    public event TrackPartChangeDelegate TrackIndexChanged;
 }
