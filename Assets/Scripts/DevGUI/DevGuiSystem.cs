@@ -6,8 +6,8 @@ public class DevGuiSystem : MonoBehaviour, DevPanelRight.PrefabProvider {
 	static public DevGuiSystem globalInstance { get { return instance; } }
 	
 	public GameObject	prefab_Label;
-	public string		labelIdChild;
-	public string		labelScriptChild;
+	public string		labelIdChild; // child of label prefab which should be used as value name UI
+	public string		labelScriptChild; // child of the prefab which should be used as the value UI 
 	public int			labelHeight = 40;
 
 	public GameObject	prefab_Slider;
@@ -21,16 +21,18 @@ public class DevGuiSystem : MonoBehaviour, DevPanelRight.PrefabProvider {
 	public int			toggleHeight = 40;
 
 
-	private DevPanelRight panelRight_;
+	private DevPanelRight panelRight_; // right now there is only 1 panel which placed to the right of the screen
 
 
 	void Awake () {
+		instance = this;
 		Object.DontDestroyOnLoad (this.gameObject);
 
 		panelRight_ = transform.FindChild ("RightPanel").gameObject.GetComponent <DevPanelRight> ();
 		panelRight_.gameObject.SetActive (false);
 	}
 
+	// Some example code
 	private DevPanelControl.Value testLabel;
 	private DevPanelControl.Value testSlider;
 	private DevPanelControl.Value testToggle;
@@ -47,16 +49,22 @@ public class DevGuiSystem : MonoBehaviour, DevPanelRight.PrefabProvider {
 		testToggle = AddToggle ("Test Toggle");
 		testToggle.Bool = false;
 	}
-
 	void OnDestroy () {
 		RemoveControl (testLabel);
+		RemoveControl (testSlider);
+		RemoveControl (testToggle);
 	}
+	//
 
+
+	// event handler called by the DEV button on top-right of the screen
 	public void OnDevToggle () {
 		panelRight_.gameObject.SetActive (!panelRight_.gameObject.activeSelf);
 	}
 
 
+	// implementation of DevPanelRight.PrefabProvider
+	//
 	public GameObject GetPrefab (DevPanelControl.Type type) {
 		switch (type) {
 			case DevPanelControl.Type.None: return null;
@@ -86,8 +94,11 @@ public class DevGuiSystem : MonoBehaviour, DevPanelRight.PrefabProvider {
 		}
 		return "Control";
 	}
+	//
 
-	
+
+	// public functions used to create/destroy dev control
+	//
 	public DevPanelControl.Value AddLabel (string identifier) {
 		return panelRight_.AddLabelControl (identifier, this, labelHeight);
 	}
@@ -103,4 +114,5 @@ public class DevGuiSystem : MonoBehaviour, DevPanelRight.PrefabProvider {
 	public void RemoveControl (DevPanelControl.Value value) {
 		panelRight_.RemoveControl (value);
 	}
+	//
 }

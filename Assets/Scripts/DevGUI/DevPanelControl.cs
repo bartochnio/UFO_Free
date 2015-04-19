@@ -75,6 +75,6 @@ public class DevPanelControl {
 		private UnityEngine.UI.Toggle toggle_;
 	}
 
-	public Value					value_;
-	public GameObject				go_;
+	public Value					value_; // object used to get/set the control's value
+	public GameObject				go_; // the control prefab instance
 }

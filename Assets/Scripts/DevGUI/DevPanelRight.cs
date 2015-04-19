@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class DevPanelRight : MonoBehaviour {
 
+	// implemetor provides the prefabs and their meta data//
+	//
 	public interface PrefabProvider {
 		GameObject	GetPrefab (DevPanelControl.Type type);
 		string		GetIdentifierChildName (DevPanelControl.Type type);
@@ -10,9 +12,12 @@ public class DevPanelRight : MonoBehaviour {
 	}
 
 
+	// container for the dev controls in this panel
 	List<DevPanelControl> controls_ = new List<DevPanelControl> ();
 
 
+	// private function used to do common init stuff on a control
+	//
 	private DevPanelControl NewControl (GameObject prefab, int height) {
 		DevPanelControl control = new DevPanelControl ();
 
@@ -35,6 +40,8 @@ public class DevPanelRight : MonoBehaviour {
 		return control;
 	}
 
+	// to create a label control
+	//
 	public DevPanelControl.Value AddLabelControl (string name, PrefabProvider prefabs, int height) {
 		var control = NewControl (prefabs.GetPrefab (DevPanelControl.Type.Label), height);
 		if (control != null) {
@@ -52,6 +59,8 @@ public class DevPanelRight : MonoBehaviour {
 		return null;
 	}
 
+	// to create a slider control
+	//
 	public DevPanelControl.Value AddSliderControl (string name, PrefabProvider prefabs, int height) {
 		var control = NewControl (prefabs.GetPrefab (DevPanelControl.Type.Slider), height);
 		if (control != null) {
@@ -69,6 +78,8 @@ public class DevPanelRight : MonoBehaviour {
 		return null;
 	}
 
+	// to create a toggle control
+	//
 	public DevPanelControl.Value AddToggleControl (string name, PrefabProvider prefabs, int height) {
 		var control = NewControl (prefabs.GetPrefab (DevPanelControl.Type.Toggle), height);
 		if (control != null) {
@@ -86,6 +97,8 @@ public class DevPanelRight : MonoBehaviour {
 		return null;
 	}
 
+	// to destroy a control
+	//
 	public void RemoveControl (DevPanelControl.Value value) {
 		var control = controls_.Find ( ctrl => ctrl.value_ == value );
 		if (control != null) {
