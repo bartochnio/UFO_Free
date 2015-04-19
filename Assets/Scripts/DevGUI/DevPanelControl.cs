@@ -48,7 +48,7 @@ public class DevPanelControl {
 		}
 
 		public void UpdateText () {
-			text_.text = string.Format ("{0}: {1} [{2}, {3}]", name_, this.Float, this.MinFloat, this.MaxFloat);
+			text_.text = string.Format ("{0}: {1:0.000} [{2}, {3}]", name_, this.Float, this.MinFloat, this.MaxFloat);
 		}
 
 		public SliderValue (UnityEngine.UI.Slider slider, UnityEngine.UI.Text text, string name) {

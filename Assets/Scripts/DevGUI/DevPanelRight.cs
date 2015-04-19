@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class DevPanelRight : MonoBehaviour {
 
-	// implemetor provides the prefabs and their meta data//
+	// implementor provides the prefabs and their meta data
 	//
 	public interface PrefabProvider {
 		GameObject	GetPrefab (DevPanelControl.Type type);
@@ -15,19 +15,60 @@ public class DevPanelRight : MonoBehaviour {
 	// container for the dev controls in this panel
 	List<DevPanelControl> controls_ = new List<DevPanelControl> ();
 
+	private UnityEngine.UI.Scrollbar scrollbar_ = null;
+	Transform scrolledPanelTx_;
+
+
+	void Awake () {
+		scrollbar_ = transform.FindChild ("Scrollbar").GetComponent <UnityEngine.UI.Scrollbar> ();
+		scrollbar_.onValueChanged.AddListener (OnScrollbarChanged);
+
+		scrolledPanelTx_ = transform.FindChild ("Panel");
+	}
+
+
+	// event handler for scrollbar
+	void OnScrollbarChanged (float value) {
+		float panelViewHeight	 = GetPanelViewHeight ();
+		float panelContentHeight = CalcPanelContentHeight ();
+
+		float offset = 0.0f;
+
+		if (panelContentHeight > panelViewHeight) {
+			float diff = panelContentHeight - panelViewHeight;
+			offset = diff * value;
+		}
+
+		(scrolledPanelTx_ as RectTransform).anchoredPosition = new Vector2 (0, offset);
+		//scrollbar_.interactable = offset > 0.0f;
+	}
+
+	float GetPanelViewHeight () {
+		return (transform as RectTransform).rect.height;
+	}
+
+	float CalcPanelContentHeight () {
+		float h = 0.0f;
+		foreach (var c in controls_) {
+			h += (c.go_.transform as RectTransform).rect.height;
+		}
+		return h;
+	}
+
 
 	// private function used to do common init stuff on a control
 	//
 	private DevPanelControl NewControl (GameObject prefab, int height) {
 		DevPanelControl control = new DevPanelControl ();
-
 		control.go_ = GameObject.Instantiate (prefab) as GameObject;
 
 		RectTransform tx = control.go_.transform as RectTransform;
-		tx.SetParent (transform, false);
+		tx.SetParent (scrolledPanelTx_, false);
 
-		tx.offsetMax = new Vector2 (0, -height * controls_.Count);
-		tx.offsetMin = new Vector2 (0, Screen.height + (transform as RectTransform).offsetMax.y - height * (controls_.Count + 1));
+		tx.anchorMin = new Vector2 (0, 1);
+		tx.anchorMax = new Vector2 (1, 1);
+		tx.anchoredPosition = new Vector2 (0, -height * controls_.Count - height * 0.5f);
+		tx.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, height);
 
 		UnityEngine.UI.Image image = control.go_.GetComponent <UnityEngine.UI.Image> ();
 

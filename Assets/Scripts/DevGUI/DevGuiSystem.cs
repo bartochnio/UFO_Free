@@ -33,7 +33,7 @@ public class DevGuiSystem : MonoBehaviour, DevPanelRight.PrefabProvider {
 	}
 
 	// Some example code
-	private DevPanelControl.Value testLabel;
+	/*private DevPanelControl.Value testLabel;
 	private DevPanelControl.Value testSlider;
 	private DevPanelControl.Value testToggle;
 	void Start () {
@@ -53,7 +53,7 @@ public class DevGuiSystem : MonoBehaviour, DevPanelRight.PrefabProvider {
 		RemoveControl (testLabel);
 		RemoveControl (testSlider);
 		RemoveControl (testToggle);
-	}
+	} */
 	//
 
 
