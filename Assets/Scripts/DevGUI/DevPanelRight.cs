@@ -67,7 +67,7 @@ public class DevPanelRight : MonoBehaviour {
 
 		tx.anchorMin = new Vector2 (0, 1);
 		tx.anchorMax = new Vector2 (1, 1);
-		tx.anchoredPosition = new Vector2 (0, -height * controls_.Count - height * 0.5f);
+		tx.anchoredPosition = new Vector2 (0, -CalcPanelContentHeight () - height * 0.5f);
 		tx.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, height);
 
 		UnityEngine.UI.Image image = control.go_.GetComponent <UnityEngine.UI.Image> ();
@@ -81,6 +81,19 @@ public class DevPanelRight : MonoBehaviour {
 		return control;
 	}
 
+	// to create a empty control
+	//
+	public DevPanelControl.Value AddEmptyControl (PrefabProvider prefabs, int height) {
+		var control = NewControl (prefabs.GetPrefab (DevPanelControl.Type.Empty), height);
+		if (control != null) {
+
+			control.value_ = new DevPanelControl.Value ();
+
+			return control.value_;
+		}
+		return null;
+	}
+
 	// to create a label control
 	//
 	public DevPanelControl.Value AddLabelControl (string name, PrefabProvider prefabs, int height) {
@@ -89,11 +102,27 @@ public class DevPanelRight : MonoBehaviour {
 			Transform aChild = control.go_.transform.FindChild (prefabs.GetIdentifierChildName (DevPanelControl.Type.Label));
 			UnityEngine.UI.Text uiNameText = aChild.GetComponent <UnityEngine.UI.Text> ();
 			uiNameText.text = name;
+			
+			control.value_ = new DevPanelControl.Value ();
+			
+			return control.value_;
+		}
+		return null;
+	}
 
-			aChild = control.go_.transform.FindChild (prefabs.GetScriptChildName (DevPanelControl.Type.Label));
+	// to create a readonly control
+	//
+	public DevPanelControl.Value AddReadonlyControl (string name, PrefabProvider prefabs, int height) {
+		var control = NewControl (prefabs.GetPrefab (DevPanelControl.Type.Readonly), height);
+		if (control != null) {
+			Transform aChild = control.go_.transform.FindChild (prefabs.GetIdentifierChildName (DevPanelControl.Type.Readonly));
+			UnityEngine.UI.Text uiNameText = aChild.GetComponent <UnityEngine.UI.Text> ();
+			uiNameText.text = name;
+
+			aChild = control.go_.transform.FindChild (prefabs.GetScriptChildName (DevPanelControl.Type.Readonly));
 			UnityEngine.UI.Text uiValueText = aChild.GetComponent <UnityEngine.UI.Text> ();
 
-			control.value_ = new DevPanelControl.LabelValue (uiValueText);
+			control.value_ = new DevPanelControl.ReadonlyValue (uiValueText);
 
 			return control.value_;
 		}
@@ -102,7 +131,7 @@ public class DevPanelRight : MonoBehaviour {
 
 	// to create a slider control
 	//
-	public DevPanelControl.Value AddSliderControl (string name, PrefabProvider prefabs, int height) {
+	public DevPanelControl.Value AddSliderControl (string name, PrefabProvider prefabs, int height, bool wholeNumbers) {
 		var control = NewControl (prefabs.GetPrefab (DevPanelControl.Type.Slider), height);
 		if (control != null) {
 			Transform aChild = control.go_.transform.FindChild (prefabs.GetIdentifierChildName (DevPanelControl.Type.Slider));
@@ -111,6 +140,8 @@ public class DevPanelRight : MonoBehaviour {
 
 			aChild = control.go_.transform.FindChild (prefabs.GetScriptChildName (DevPanelControl.Type.Slider));
 			UnityEngine.UI.Slider uiSlider = aChild.GetComponent <UnityEngine.UI.Slider> ();
+
+			uiSlider.wholeNumbers = wholeNumbers;
 
 			control.value_ = new DevPanelControl.SliderValue (uiSlider, uiNameText, name);
 
@@ -133,6 +164,27 @@ public class DevPanelRight : MonoBehaviour {
 
 			control.value_ = new DevPanelControl.ToggleValue (uiToggle);
 
+			return control.value_;
+		}
+		return null;
+	}
+
+	// to create a button control
+	//
+	public DevPanelControl.Value AddButtonControl (string name, PrefabProvider prefabs, int height, string desc) {
+		var control = NewControl (prefabs.GetPrefab (DevPanelControl.Type.Button), height);
+		if (control != null) {
+			Transform aChild = control.go_.transform.FindChild (prefabs.GetIdentifierChildName (DevPanelControl.Type.Button));
+			UnityEngine.UI.Text uiNameText = aChild.GetComponent <UnityEngine.UI.Text> ();
+			uiNameText.text = desc; // HACK.. for now use the Id control text as Description text
+			
+			aChild = control.go_.transform.FindChild (prefabs.GetScriptChildName (DevPanelControl.Type.Button));
+			UnityEngine.UI.Button uiButton = aChild.GetComponent <UnityEngine.UI.Button> ();
+
+			uiButton.transform.FindChild ("Text").GetComponent <UnityEngine.UI.Text> ().text = name;
+			
+			control.value_ = new DevPanelControl.ButtonValue (uiButton);
+			
 			return control.value_;
 		}
 		return null;

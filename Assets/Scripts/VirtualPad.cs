@@ -51,6 +51,7 @@ public class VirtualPad : MonoBehaviour {
 	void Update () {
 		velocity.x = Input.GetAxis("Horizontal");
 		velocity.y = Input.GetAxis("Vertical");
+		if (velocity.magnitude > 0.00001f) velocity.Normalize ();
 
 		if (bManipulateDPad) { // if virtual DPad is being manipulated
 			if (false == bTouched) { // with mouse ?

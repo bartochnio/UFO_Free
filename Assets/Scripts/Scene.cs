@@ -11,7 +11,10 @@ public class Scene : MonoBehaviour {
     public bool isPaused = false;
 
 
-    int maxGoodCollectibles;
+	DevGuiSystem.Helper devControls = new DevGuiSystem.Helper (); // DEV PANEL
+
+
+	int maxGoodCollectibles;
     int currentGoodCollectibles;
     int currentBadCollectibles;
 
@@ -47,12 +50,79 @@ public class Scene : MonoBehaviour {
     }
     void Awake()
     {
+		CreateDevControls ();
+
         // Logic is always first so it's safe to be called here 
 
         menuMgr = MenuMgr.GlobalInstance;
 
         timer = menuMgr.playTimer;
-    }
+	}
+
+	// DEV PANEL
+	void CreateDevControls () {
+		devControls.ReleaseControls ();
+		devControls.HoldOnTo (DevGuiSystem.globalInstance.AddLabel ("Scene setup:"));
+		{
+			var lightAngleSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Light Angle"));
+			lightAngleSlider.MinFloat = 10;
+			lightAngleSlider.MaxFloat = 100;
+			lightAngleSlider.OnChanged += () => {
+				player.transform.Find ("Spotlight").GetComponent <Light> ().spotAngle = lightAngleSlider.Float;
+				PlayerPrefs.SetFloat ("SceneSetup-PlayerLightAngle", lightAngleSlider.Float);
+			};
+			lightAngleSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-PlayerLightAngle", 32.0f);
+
+			var lightRangeSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Light Range"));
+			lightRangeSlider.MinFloat = 10;
+			lightRangeSlider.MaxFloat = 100;
+			lightRangeSlider.OnChanged += () => {
+				player.transform.Find ("Spotlight").GetComponent <Light> ().range = lightRangeSlider.Float;
+				PlayerPrefs.SetFloat ("SceneSetup-PlayerLightRange", lightRangeSlider.Float);
+			};
+			lightRangeSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-PlayerLightRange", 10.0f);
+
+			var cameraSizeSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Camera Size"));
+			cameraSizeSlider.MinFloat = 0.5f;
+			cameraSizeSlider.MaxFloat = 10;
+			cameraSizeSlider.OnChanged += () => {
+				Camera.main.orthographicSize = cameraSizeSlider.Float;
+				PlayerPrefs.SetFloat ("SceneSetup-CameraSize", cameraSizeSlider.Float);
+			};
+			cameraSizeSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-CameraSize", 2.186279f);
+
+			var maxSpeedSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Speed"));
+			maxSpeedSlider.MinFloat = 2;
+			maxSpeedSlider.MaxFloat = 30;
+			maxSpeedSlider.OnChanged += () => {
+				player.maxSpeed = maxSpeedSlider.Float;
+				PlayerPrefs.SetFloat ("SceneSetup-PlayerMoveSpeed", maxSpeedSlider.Float);
+			};
+			maxSpeedSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-PlayerMoveSpeed", 10.0f);
+
+			var stageTimeSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Stage time", wholeNumbers: true));
+			stageTimeSlider.MinFloat = 10;
+			stageTimeSlider.MaxFloat = 300;
+			stageTimeSlider.OnChanged += () => {
+				stageTime = stageTimeSlider.Float;
+				PlayerPrefs.SetFloat ("SceneSetup-StageTime", stageTimeSlider.Float);
+			};
+			stageTimeSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-StageTime", 30);
+
+
+			var resetButton = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddButton ("Reset", "Reset scene setup values"));
+			resetButton.OnChanged += () => {
+				lightAngleSlider.Float = 32.0f;
+				lightRangeSlider.Float = 10.0f;
+				cameraSizeSlider.Float = 2.186279f;
+				maxSpeedSlider.Float = 10.0f;
+				stageTimeSlider.Float = 30;
+			};
+		}
+
+		devControls.HoldOnTo (DevGuiSystem.globalInstance.AddEmpty ());
+	}
+	//
 
 	void Start () 
     {
@@ -79,6 +149,8 @@ public class Scene : MonoBehaviour {
 
     void OnDestroy()
     {
+		devControls.ReleaseControls ();
+
         timer.Timer.IntervalEvent -= this.TimerEventHandler;
         outOfPlayzoneScript.timer.Timer.IntervalEvent -= TimeOuthandler;
     }

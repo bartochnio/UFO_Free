@@ -4,10 +4,12 @@ using UnityEngine.UI;
 
 public class DevPanelControl {
 	public enum Type {
-		None,
+		Empty,
 		Label,
+		Readonly,
 		Slider,
-		Toggle
+		Toggle,
+		Button
 	}
 
 	public class Value {
@@ -17,15 +19,24 @@ public class DevPanelControl {
 		virtual public float MaxFloat { set {} get { return 0f; } }
 
 		virtual public bool  Bool { set {} get { return false; } }
+
+		public delegate void OnChangedHandler ();
+		public event OnChangedHandler OnChanged;
+
+		protected void FireOnChangeEvent () {
+			if (OnChanged != null) {
+				OnChanged ();
+			}
+		}
 	}
 
-	public class LabelValue : Value {
+	public class ReadonlyValue : Value {
 		override public float Float {
 			set { valueText_.text = value.ToString (); }
 			get { return float.Parse (valueText_.text);	}
 		}
 
-		public LabelValue (UnityEngine.UI.Text valueText) {
+		public ReadonlyValue (UnityEngine.UI.Text valueText) {
 			valueText_ = valueText;
 		}
 		private UnityEngine.UI.Text valueText_;
@@ -56,7 +67,10 @@ public class DevPanelControl {
 			text_ = text;
 			name_ = name;
 
-			slider_.onValueChanged.AddListener (value => { UpdateText (); });
+			slider_.onValueChanged.AddListener (value => {
+				UpdateText ();
+				FireOnChangeEvent ();
+			});
 		}
 		private UnityEngine.UI.Slider slider_;
 		private UnityEngine.UI.Text text_;
@@ -71,8 +85,19 @@ public class DevPanelControl {
 
 		public ToggleValue (UnityEngine.UI.Toggle toggle) {
 			toggle_ = toggle;
+			toggle_.onValueChanged.AddListener (flag => {
+				FireOnChangeEvent ();
+			});
 		}
 		private UnityEngine.UI.Toggle toggle_;
+	}
+
+	public class ButtonValue : Value {
+		public ButtonValue (UnityEngine.UI.Button button) {
+			button.onClick.AddListener (() => {
+				FireOnChangeEvent (); // HACK.. for now use the onchange event for button press!
+			});
+		}
 	}
 
 	public Value					value_; // object used to get/set the control's value
