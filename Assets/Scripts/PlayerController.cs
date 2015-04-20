@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour {
     private GameObject curItem = null;
     private List<GameObject> items = new List<GameObject>();
 
+    private HashSet<int> visitedCurves = new HashSet<int>();
+
     int curveIndex = 0;
     public int CurveIndex
     {
@@ -39,6 +41,8 @@ public class PlayerController : MonoBehaviour {
     {
         transform.position = track.GetCurvePoint(curveIndex, 0.5f);
         curveIndex = 0;
+
+        visitedCurves.Clear();
     }
 
 	void Start () 
@@ -66,6 +70,7 @@ public class PlayerController : MonoBehaviour {
     void UpdateTrackVisibility(int index)
     {
         //track.SendMessage("DisableTrack");
+        visitedCurves.Add(curveIndex);
 
         curveIndex = index;
         nextIndex = curveIndex;
@@ -174,6 +179,11 @@ public class PlayerController : MonoBehaviour {
                 track.SendMessage("DisableCurve", index);
 
             if (TrackIndexChanged != null) TrackIndexChanged(curveIndex, nextIndex, PrevIndex); 
+        }
+        else if (other.tag == "Finish" && visitedCurves.Count == track.CurveCount)
+        {
+           //The player traversed the whole track - we can finish now
+           Scene.GlobalInstance.FinishStage(0);
         }
     }
     
