@@ -9,7 +9,9 @@ public class PlayerController : MonoBehaviour {
     public BezierSpline track;
     public float timer = 2.0f;
 
-    //private float counter = 0.0f;
+    //(Kamil): I know it's ugly as hell - will refactor ;)
+    private float dirCounter = 0.0f;
+    
     private bool isOutside = false;
     private GameObject arrow;
     private SpriteRenderer arrowSprite;
@@ -65,7 +67,35 @@ public class PlayerController : MonoBehaviour {
 		if (Input.GetButtonDown("Jump")) {
         	CollectItem();
 		}
+
+        if (!isOutside)
+        {
+            CheckDirection();
+        }
 	}
+
+    void CheckDirection()
+    {
+        float t = 0.0f;
+        track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
+        Vector2 curveTangent = track.GetCurveVelocity(curveIndex, t).normalized;
+        if (velocity.sqrMagnitude > 0.5f)
+        {
+            float p = Vector2.Dot(velocity.normalized, curveTangent);
+            if (p < -0.2)
+            {
+                dirCounter += Time.deltaTime;
+            }
+            else
+                dirCounter = 0.0f;
+        }
+
+        //display wrong direction sign
+        if (dirCounter > 1.0f)
+        {
+            Scene.GlobalInstance.SetOutsideTheTrack(true); //TEMP
+        }
+    }
 
     void UpdateTrackVisibility(int index)
     {

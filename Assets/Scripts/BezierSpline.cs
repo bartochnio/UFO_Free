@@ -62,8 +62,8 @@ public class BezierSpline : MonoBehaviour {
         Vector3 lineStart = GetCurvePoint(idx, 0.0f);
         for (int i = 1; i <= steps; ++i)
         {
-            t = i / (float)steps;
-            Vector3 lineEnd = GetCurvePoint(idx, t);
+            float ct = i / (float)steps;
+            Vector3 lineEnd = GetCurvePoint(idx, ct);
 
             //Debug.DrawLine(lineStart, lineEnd, Color.cyan);
 
@@ -71,6 +71,7 @@ public class BezierSpline : MonoBehaviour {
             if (Vector3.Distance(p, c) <= Vector3.Distance(p, closest))
             {
                 closest = c;
+                t = ct;
             }
 
             lineStart = lineEnd;
