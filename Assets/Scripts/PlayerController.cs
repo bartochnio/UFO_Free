@@ -54,8 +54,6 @@ public class PlayerController : MonoBehaviour {
         arrowSprite = arrow.GetComponent<SpriteRenderer>();
 
         UpdateTrackVisibility(curveIndex);
-        //track.gameObject.SendMessage("DisableTrack");
-        //track.gameObject.SendMessage("EnableCurve", curveIndex);
 	}
 
 
@@ -83,17 +81,21 @@ public class PlayerController : MonoBehaviour {
         {
             float p = Vector2.Dot(velocity.normalized, curveTangent);
             if (p < -0.2)
-            {
                 dirCounter += Time.deltaTime;
-            }
             else
                 dirCounter = 0.0f;
         }
-
+        else
+            dirCounter = 0.0f;
+        
         //display wrong direction sign
-        if (dirCounter > 1.0f)
+        if (dirCounter > 1.0f && !isOutside)
         {
-            Scene.GlobalInstance.SetOutsideTheTrack(true); //TEMP
+            Scene.GlobalInstance.SetOutsideTheTrack(true);
+        }
+        else
+        {
+            Scene.GlobalInstance.SetOutsideTheTrack(false);
         }
     }
 
@@ -208,26 +210,18 @@ public class PlayerController : MonoBehaviour {
             else if (index != curveIndex)
                 track.SendMessage("DisableCurve", index);
 
+            if (index == curveIndex)
+            {
+                Scene.GlobalInstance.SetOutsideTheTrack(false);
+                isOutside = false;
+            }
+
             if (TrackIndexChanged != null) TrackIndexChanged(curveIndex, nextIndex, PrevIndex); 
         }
         else if (other.tag == "Finish" && visitedCurves.Count == track.CurveCount)
         {
            //The player traversed the whole track - we can finish now
            Scene.GlobalInstance.FinishStage(0);
-        }
-    }
-    
-    void OnTriggerStay2D(Collider2D other) 
-    {
-        if (other.tag == "Track") 
-        {
-            int index = int.Parse(other.gameObject.name);
-
-            if (index == curveIndex)
-            {
-                Scene.GlobalInstance.SetOutsideTheTrack(false);
-                isOutside = false;
-            }
         }
     }
 
@@ -244,8 +238,6 @@ public class PlayerController : MonoBehaviour {
             }
 
             track.SendMessage("EnableCurve", index);
-            
-            
         }
         else if(other.tag == "Collectable")
         {
