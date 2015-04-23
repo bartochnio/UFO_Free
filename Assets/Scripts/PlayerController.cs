@@ -91,11 +91,11 @@ public class PlayerController : MonoBehaviour {
         //display wrong direction sign
         if (dirCounter > 1.0f && !isOutside)
         {
-            Scene.GlobalInstance.SetOutsideTheTrack(true);
+            Scene.GlobalInstance.SetWrongWayMsg(true);
         }
         else
         {
-            Scene.GlobalInstance.SetOutsideTheTrack(false);
+            Scene.GlobalInstance.SetWrongWayMsg(false);
         }
     }
 
@@ -212,7 +212,7 @@ public class PlayerController : MonoBehaviour {
 
             if (index == curveIndex)
             {
-                Scene.GlobalInstance.SetOutsideTheTrack(false);
+                Scene.GlobalInstance.SetOutsideTrackMsg(false);
                 isOutside = false;
             }
 
@@ -234,7 +234,7 @@ public class PlayerController : MonoBehaviour {
             if (index == curveIndex)
             {
                 isOutside = true;
-                Scene.GlobalInstance.SetOutsideTheTrack(true);
+                Scene.GlobalInstance.SetOutsideTrackMsg(true);
             }
 
             track.SendMessage("EnableCurve", index);

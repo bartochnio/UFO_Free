@@ -6,6 +6,9 @@ public class Scene : MonoBehaviour {
 
     public float stageTime;
     public GUITimer timer;
+
+    public HUD hud;
+
     public PlayerController player;
     public CameraController cam;
     public bool isPaused = false;
@@ -20,8 +23,6 @@ public class Scene : MonoBehaviour {
 
     public const int GoodPoints = 10;
     public const int BadPoints = -10;
-
-    public OutOfThePlayzone outOfPlayzoneScript;
 
     public int CurrentCollectScore
     {
@@ -134,25 +135,15 @@ public class Scene : MonoBehaviour {
 
         maxGoodCollectibles = all.FindAll(x => x.collectType == Collectable.CollectType.Good).Count;
 
-        outOfPlayzoneScript = FindObjectOfType<OutOfThePlayzone>();
-        outOfPlayzoneScript.timer.Timer.IntervalEvent += TimeOuthandler;
-
         menuMgr.inGameMenu.ShowMenu(false);
 
 	}
-
-    void TimeOuthandler(TimerThingy t, float time)
-    {
-        if (t.TimeLeft <= 0)
-        Scene.GlobalInstance.FinishStage(0);
-    }
 
     void OnDestroy()
     {
 		devControls.ReleaseControls ();
 
         timer.Timer.IntervalEvent -= this.TimerEventHandler;
-        outOfPlayzoneScript.timer.Timer.IntervalEvent -= TimeOuthandler;
     }
 
 
@@ -183,8 +174,7 @@ public class Scene : MonoBehaviour {
 
     public void ChangeDisplayedScore(int amount)
     {
-        
-        menuMgr.playScore.ChangeScore(amount);
+        hud.ChangeScore(amount);
     }
 
     public void TimerEventHandler(TimerThingy sender, float intervalTime)
@@ -203,10 +193,20 @@ public class Scene : MonoBehaviour {
         StartCoroutine( menuMgr.endScreenSucces.GetComponentInChildren<ScorringScreen>().ScoringRoutine(currentGoodCollectibles, currentBadCollectibles, finishTime, GoodPoints, BadPoints, 10));
     }
 
-    public void SetOutsideTheTrack(bool value)
+    public void SetOutsideTrackMsg(bool value)
     {
-        if (outOfPlayzoneScript != null)
-            outOfPlayzoneScript.SetEmergencyScreen(value);
+        if (value)
+            hud.ShowWarningMessage("GET BACK TO THE TRACK!", true, 3);
+        else
+            hud.HideWarning();
+    }
+
+    public void SetWrongWayMsg(bool value)
+    {
+        if (value)
+            hud.ShowWarningMessage("WRONG WAY!", true, 0);
+        else
+            hud.HideWarning();
     }
 
     public void SetPause(bool value)
