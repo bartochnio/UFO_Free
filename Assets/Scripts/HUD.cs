@@ -10,16 +10,23 @@ public class HUD : MonoBehaviour {
 	void Start () 
     {
         warning.HideMessage();
+        warning.timerEvent += WarningTimeFinished;
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
+	void Update () 
+    {
+
 	}
 
     public void ChangeScore(int amount)
     {
         scoreText.ChangeScore(amount);
+    }
+
+    public void ResetScore()
+    {
+        scoreText.ResetScore();
     }
 
     public void ShowWarningMessage(string msg, bool icon, int time)
@@ -34,6 +41,6 @@ public class HUD : MonoBehaviour {
 
     private void WarningTimeFinished()
     {
-
+        Scene.GlobalInstance.FinishStage(0);
     }
 }

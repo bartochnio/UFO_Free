@@ -187,7 +187,7 @@ public class Scene : MonoBehaviour {
     {
         // ToDo: Show all necessary stuff. Show the score set score etc.
         SetPause(true);
-        menuMgr.playScore.ResetScore();
+        hud.ResetScore();
         menuMgr.SetMenuVisiable(MenuMgr.MenuTypes.StageEndSucces);
         // Need Refactor on this
         StartCoroutine( menuMgr.endScreenSucces.GetComponentInChildren<ScorringScreen>().ScoringRoutine(currentGoodCollectibles, currentBadCollectibles, finishTime, GoodPoints, BadPoints, 10));
