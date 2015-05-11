@@ -125,7 +125,11 @@ public class Collectable : MonoBehaviour {
             yield return null;
         }
 
-        Destroy(gameObject);
+		// Moved from OnDestroy
+		PlayerController pc = GameObject.FindObjectOfType<PlayerController>();
+		pc.TrackIndexChanged -= this.TrackPartChangedHandler;
+        //
+		Destroy(gameObject);
     }
 
     IEnumerator Flash()
@@ -191,8 +195,8 @@ public class Collectable : MonoBehaviour {
             {
                 if (firstSet)
                 {
-                     myIdx = idx;
-                    Debug.Log(name + " Moved to IDX " + idx);
+                    myIdx = idx;
+                    //Debug.Log(name + " Moved to IDX " + idx);
                    
                     int cur = pc.CurveIndex;
                     int p = pc.PrevIndex;
@@ -205,7 +209,7 @@ public class Collectable : MonoBehaviour {
                    
                     {
                         myIdx = idx;
-                        Debug.Log(name + " Moved to IDX " + idx);
+                        //Debug.Log(name + " Moved to IDX " + idx);
                        
                         int cur = pc.CurveIndex;
                         int p = pc.PrevIndex;
@@ -245,7 +249,9 @@ public class Collectable : MonoBehaviour {
     
     void OnDestroy()
     {
-        PlayerController c = GameObject.FindObjectOfType<PlayerController>();
-        c.TrackIndexChanged -= this.TrackPartChangedHandler;
+		// Moved to Beam()
+		//
+        //PlayerController c = GameObject.FindObjectOfType<PlayerController>();
+        //c.TrackIndexChanged -= this.TrackPartChangedHandler;
     }
 }

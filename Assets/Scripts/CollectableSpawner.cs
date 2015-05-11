@@ -33,6 +33,7 @@ public class CollectableSpawner : MonoBehaviour {
 				PlayerPrefs.SetFloat ("CollectablesSetup-Amount", amountSlider.Float);
 			};
 			amountSlider.Float = PlayerPrefs.GetFloat ("CollectablesSetup-Amount", 40);
+			amount = (int)amountSlider.Float;
 
 			var spreadSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Spread"));
 			spreadSlider.MinFloat = 0.1f;
@@ -42,6 +43,7 @@ public class CollectableSpawner : MonoBehaviour {
 				PlayerPrefs.SetFloat ("CollectablesSetup-Spread", spreadSlider.Float);
 			};
 			spreadSlider.Float = PlayerPrefs.GetFloat ("CollectablesSetup-Spread", 0.5f);
+			diff = amountSlider.Float;
 
 			var radiusBiasSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Radius bias"));
 			radiusBiasSlider.MinFloat = 0.01f;
@@ -51,6 +53,7 @@ public class CollectableSpawner : MonoBehaviour {
 				PlayerPrefs.SetFloat ("CollectablesSetup-RadiusBias", radiusBiasSlider.Float);
 			};
 			radiusBiasSlider.Float = PlayerPrefs.GetFloat ("CollectablesSetup-RadiusBias", 0.1f);
+			radiusBias = radiusBiasSlider.Float;
 
 			var pointsSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Points", wholeNumbers:true));
 			pointsSlider.MinFloat = 1;
@@ -60,6 +63,7 @@ public class CollectableSpawner : MonoBehaviour {
 				PlayerPrefs.SetFloat ("CollectablesSetup-Points", pointsSlider.Float);
 			};
 			pointsSlider.Float = PlayerPrefs.GetFloat ("CollectablesSetup-Points", 10);
+			points = (int)pointsSlider.Float;
 
 
 			var resetButton = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddButton ("Reset", "Reset collectibles setup values"));

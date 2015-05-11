@@ -25,6 +25,7 @@ public class Track : MonoBehaviour {
         Color color = Color.white;
         color.a = alpha;
         meshGOs[index].GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+		//meshGOs[index].GetComponent<MeshRenderer>().material.color = color;
     }
 
     void GenerateMesh()
@@ -38,14 +39,15 @@ public class Track : MonoBehaviour {
         {
             meshGOs[i] = new GameObject(i.ToString());
             meshGOs[i].transform.SetParent(transform);
-            MeshRenderer meshRenderer = meshGOs[i].AddComponent<MeshRenderer>();
-            MeshFilter filter = meshGOs[i].AddComponent<MeshFilter>();
 
             GenerateCurveMesh(i, builder);
 
             Mesh mesh = builder.CreateMesh();
-            filter.sharedMesh = mesh;
-            meshRenderer.material = material;
+			MeshFilter filter = meshGOs[i].AddComponent<MeshFilter>();
+			filter.sharedMesh = mesh;
+
+			MeshRenderer meshRenderer = meshGOs[i].AddComponent<MeshRenderer>();
+			meshRenderer.material = material;
 
             meshGOs[i].tag = "Track";
 

@@ -73,8 +73,9 @@ public class Scene : MonoBehaviour {
 				PlayerPrefs.SetFloat ("SceneSetup-PlayerLightAngle", lightAngleSlider.Float);
 			};
 			lightAngleSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-PlayerLightAngle", 32.0f);
+			player.transform.Find ("Spotlight").GetComponent <Light> ().spotAngle = lightAngleSlider.Float;
 
-			var lightRangeSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Light Range"));
+			/*var lightRangeSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Light Range"));
 			lightRangeSlider.MinFloat = 10;
 			lightRangeSlider.MaxFloat = 100;
 			lightRangeSlider.OnChanged += () => {
@@ -82,6 +83,7 @@ public class Scene : MonoBehaviour {
 				PlayerPrefs.SetFloat ("SceneSetup-PlayerLightRange", lightRangeSlider.Float);
 			};
 			lightRangeSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-PlayerLightRange", 10.0f);
+			player.transform.Find ("Spotlight").GetComponent <Light> ().range = lightRangeSlider.Float; */
 
 			var cameraSizeSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Camera Size"));
 			cameraSizeSlider.MinFloat = 0.5f;
@@ -91,15 +93,17 @@ public class Scene : MonoBehaviour {
 				PlayerPrefs.SetFloat ("SceneSetup-CameraSize", cameraSizeSlider.Float);
 			};
 			cameraSizeSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-CameraSize", 2.186279f);
+			Camera.main.orthographicSize = cameraSizeSlider.Float;
 
 			var maxSpeedSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Speed"));
-			maxSpeedSlider.MinFloat = 2;
-			maxSpeedSlider.MaxFloat = 30;
+			maxSpeedSlider.MinFloat = 0.5f;
+			maxSpeedSlider.MaxFloat = 10.0f;
 			maxSpeedSlider.OnChanged += () => {
 				player.maxSpeed = maxSpeedSlider.Float;
 				PlayerPrefs.SetFloat ("SceneSetup-PlayerMoveSpeed", maxSpeedSlider.Float);
 			};
-			maxSpeedSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-PlayerMoveSpeed", 10.0f);
+			maxSpeedSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-PlayerMoveSpeed", 4.0f);
+			player.maxSpeed = maxSpeedSlider.Float;
 
 			var stageTimeSlider = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddSlider ("Stage time", wholeNumbers: true));
 			stageTimeSlider.MinFloat = 10;
@@ -109,14 +113,15 @@ public class Scene : MonoBehaviour {
 				PlayerPrefs.SetFloat ("SceneSetup-StageTime", stageTimeSlider.Float);
 			};
 			stageTimeSlider.Float = PlayerPrefs.GetFloat ("SceneSetup-StageTime", 30);
+			stageTime = stageTimeSlider.Float;
 
 
 			var resetButton = devControls.HoldOnTo (DevGuiSystem.globalInstance.AddButton ("Reset", "Reset scene setup values"));
 			resetButton.OnChanged += () => {
 				lightAngleSlider.Float = 32.0f;
-				lightRangeSlider.Float = 10.0f;
+				//lightRangeSlider.Float = 10.0f;
 				cameraSizeSlider.Float = 2.186279f;
-				maxSpeedSlider.Float = 10.0f;
+				maxSpeedSlider.Float = 4.0f;
 				stageTimeSlider.Float = 30;
 			};
 		}
@@ -128,7 +133,7 @@ public class Scene : MonoBehaviour {
 	void Start () 
     {
         timer.Timer.StartTimer(stageTime);
-        menuMgr.playScore.ResetScore();
+        //menuMgr.playScore.ResetScore();
         timer.Timer.IntervalEvent += this.TimerEventHandler;
         
         List<Collectable> all = new List<Collectable>(FindObjectsOfType<Collectable>());

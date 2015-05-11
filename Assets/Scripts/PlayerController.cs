@@ -161,11 +161,11 @@ public class PlayerController : MonoBehaviour {
 		axis.x = VirtualPad.globalInstance.Horizontal; //Input.GetAxis("Horizontal");
 		axis.y = VirtualPad.globalInstance.Vertical; //Input.GetAxis("Vertical");
 
-        /*if (axis.sqrMagnitude > 0.00001f)
+        if (axis.sqrMagnitude > 0.00001f)
         {
            axis = axis.normalized * maxSpeed;
-        }*/
-		axis *= maxSpeed;
+        }
+		//axis *= maxSpeed;
 
         velocity.x = Mathf.Lerp(velocity.x, axis.x, speed * Time.deltaTime);
         velocity.y = Mathf.Lerp(velocity.y, axis.y, speed * Time.deltaTime);
