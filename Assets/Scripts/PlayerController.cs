@@ -42,7 +42,9 @@ public class PlayerController : MonoBehaviour {
 
     public void Respawn()
     {
-        transform.position = track.GetCurvePoint(curveIndex, 0.5f);
+        Vector3 pos = track.GetCurvePoint(curveIndex, 0.5f);
+        pos.z = -5.0f;
+        transform.position = pos;
         curveIndex = 0;
 
         visitedCurves.Clear();

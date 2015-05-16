@@ -124,6 +124,7 @@ public class CollectableSpawner : MonoBehaviour {
                 c.Player = player;
                 c.startT = t;
                 c.collectType = (Collectable.CollectType)(Random.Range(0, 2));
+                newPos.z = 0.0f;
                 go.transform.position = newPos;
             }
         }

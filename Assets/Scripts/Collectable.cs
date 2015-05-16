@@ -102,7 +102,9 @@ public class Collectable : MonoBehaviour {
             else if (curT <= 0.0f)
                 curT = 1.0f;
 
-            transform.position = spline.GetPoint(curT);
+            Vector3 p = spline.GetPoint(curT);
+            p.z = 0.0f;
+            transform.position = p;
 
             Vector2 vel = spline.GetVelocity(curT);
             float angle = Mathf.Rad2Deg * Mathf.Atan2(vel.y, vel.x);
