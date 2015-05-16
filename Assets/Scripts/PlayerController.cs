@@ -68,7 +68,7 @@ public class PlayerController : MonoBehaviour {
         arrow = transform.FindChild("Arrow").gameObject; //UNSAFE
         arrowSprite = arrow.GetComponent<SpriteRenderer>();
 
-        UpdateTrackVisibility(curveIndex);
+        //UpdateTrackVisibility(curveIndex);
 	}
 
 
