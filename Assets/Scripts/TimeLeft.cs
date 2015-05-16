@@ -26,6 +26,11 @@ public class TimeLeft : MonoBehaviour {
         counter -= Time.deltaTime;
         counter = Mathf.Max(counter, 0.0f);
 
+        if (counter == 0.0f)
+        {
+            timerEvent();
+        }
+
         //Timer effect
         guiText.text = counter.ToString("0.0");
 
@@ -48,4 +53,7 @@ public class TimeLeft : MonoBehaviour {
     {
         paused = val;
     }
+
+    public event WarningTimerFinished timerEvent;
+    public delegate void WarningTimerFinished();
 }

@@ -12,6 +12,7 @@ public class HUD : MonoBehaviour {
     {
         warning.HideMessage();
         warning.timerEvent += WarningTimeFinished;
+        timeLeft.timerEvent += WarningTimeFinished;
 	}
 	
 	// Update is called once per frame
