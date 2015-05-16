@@ -48,6 +48,11 @@ public class VirtualPad : MonoBehaviour {
 		DPadBtnRadius = 0.5f * btnDiagonal.magnitude;
 	}
 
+    void OnDisable()
+    {
+        velocity = Vector3.zero;
+    }
+
 	void Update () {
 		velocity.x = Input.GetAxis("Horizontal");
 		velocity.y = Input.GetAxis("Vertical");

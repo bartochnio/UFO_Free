@@ -6,5 +6,7 @@ public enum UFOEvents
     PlayerOutside,
     PlayerWrongWay,
     PlayerScore,
-    PlayerFail
+    PlayerFail,
+
+    GameOver
 }

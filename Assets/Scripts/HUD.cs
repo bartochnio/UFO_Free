@@ -5,6 +5,7 @@ public class HUD : MonoBehaviour {
 
     public WarningMsg warning;
     public Score scoreText;
+    public TimeLeft timeLeft;
 
 	// Use this for initialization
 	void Start () 
@@ -32,6 +33,11 @@ public class HUD : MonoBehaviour {
         scoreText.ResetScore();
     }
 
+    public void Pause(bool val)
+    {
+        timeLeft.Pause(val);
+    }
+
     public void ShowWarningMessage(string msg, bool icon, int time)
     {
         warning.ShowMessage(msg, icon, time);
@@ -44,6 +50,7 @@ public class HUD : MonoBehaviour {
 
     private void WarningTimeFinished()
     {
+        Messenger.Invoke(UFOEvents.GameOver);
        //Scene.GlobalInstance.FinishStage(0);
     }
 }

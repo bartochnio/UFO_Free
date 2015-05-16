@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour {
 
     //(Kamil): I know it's ugly as hell - will refactor ;)
     private float dirCounter = 0.0f;
+    private bool paused = false;
     
     private bool isOutside = false;
     private GameObject arrow;
@@ -45,6 +46,18 @@ public class PlayerController : MonoBehaviour {
         curveIndex = 0;
 
         visitedCurves.Clear();
+
+        paused = false;
+    }
+
+    void OnEnable()
+    {
+        Messenger.AddListener(UFOEvents.GameOver, OnGameOver);
+    }
+
+    void OnDisable()
+    {
+        Messenger.RemoveListener(UFOEvents.GameOver, OnGameOver);
     }
 
 	void Start () 
@@ -60,6 +73,10 @@ public class PlayerController : MonoBehaviour {
 	void Update () 
     {
         Move();
+
+        if (paused)
+            return;
+
         ShowArrow();
 
 		if (Input.GetButtonDown("Jump")) {
@@ -226,6 +243,7 @@ public class PlayerController : MonoBehaviour {
         {
            //The player traversed the whole track - we can finish now
            //Scene.GlobalInstance.FinishStage(0);
+            Messenger.Invoke(UFOEvents.GameOver);
         }
     }
 
@@ -258,4 +276,11 @@ public class PlayerController : MonoBehaviour {
 
     public delegate void TrackPartChangeDelegate(int currentIdx,int preIdx, int nextIdx);
     public event TrackPartChangeDelegate TrackIndexChanged;
+
+    //Event handlers
+    private void OnGameOver()
+    {
+        paused = true;
+        arrow.SetActive(false);
+    }
 }

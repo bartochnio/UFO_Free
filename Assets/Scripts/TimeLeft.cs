@@ -9,6 +9,7 @@ public class TimeLeft : MonoBehaviour {
     public float warningTime = 15.0f;
 
     private float counter = 0.0f;
+    private bool paused = false;
 
 	// Use this for initialization
 	void Start () 
@@ -19,6 +20,9 @@ public class TimeLeft : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
     {
+        if (paused)
+            return;
+
         counter -= Time.deltaTime;
         counter = Mathf.Max(counter, 0.0f);
 
@@ -33,4 +37,15 @@ public class TimeLeft : MonoBehaviour {
         else
            guiText.color = Color.white;
 	}
+
+    public void ResetTime()
+    {
+        counter = startTime;
+        paused = false;
+    }
+
+    public void Pause(bool val)
+    {
+        paused = val;
+    }
 }

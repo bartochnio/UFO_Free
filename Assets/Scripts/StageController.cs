@@ -4,6 +4,7 @@ using System.Collections;
 public class StageController : MonoBehaviour {
 
     public HUD hud;
+    public GameObject cockpit;
     public const int GoodPoints = 10;
     public const int BadPoints = -10;
 
@@ -14,6 +15,7 @@ public class StageController : MonoBehaviour {
     {
         Messenger.AddListener(UFOEvents.PlayerFail, OnScoreBad);
         Messenger.AddListener(UFOEvents.PlayerScore, OnScoreGood);
+        Messenger.AddListener(UFOEvents.GameOver, OnGameOver);
         Messenger<bool>.AddListener(UFOEvents.PlayerOutside, OnPlayerOutside);
         Messenger<bool>.AddListener(UFOEvents.PlayerWrongWay, OnPlayerWrongWay);
     }
@@ -22,6 +24,7 @@ public class StageController : MonoBehaviour {
     {
         Messenger.RemoveListener(UFOEvents.PlayerFail, OnScoreBad);
         Messenger.RemoveListener(UFOEvents.PlayerScore, OnScoreGood);
+        Messenger.RemoveListener(UFOEvents.GameOver, OnGameOver);
         Messenger<bool>.RemoveListener(UFOEvents.PlayerOutside, OnPlayerOutside);
         Messenger<bool>.RemoveListener(UFOEvents.PlayerWrongWay, OnPlayerWrongWay);
     }
@@ -37,6 +40,11 @@ public class StageController : MonoBehaviour {
     {
 	
 	}
+
+    public void RestartStage()
+    {
+        Application.LoadLevel(0);
+    }
 
     private void ResetScore()
     {
@@ -71,5 +79,12 @@ public class StageController : MonoBehaviour {
             hud.ShowWarningMessage("WRONG WAY!", true, 0);
         else
             hud.HideWarning();
+    }
+
+    private void OnGameOver()
+    {
+        hud.ShowWarningMessage("GAME OVER", false, 0);
+        cockpit.SetActive(false);
+        hud.Pause(true);
     }
 }
