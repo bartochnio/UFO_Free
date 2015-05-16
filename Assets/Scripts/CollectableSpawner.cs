@@ -16,8 +16,8 @@ public class CollectableSpawner : MonoBehaviour {
 
     
 	void Awake() {
-		CreateDevControls ();
-		Spawn();
+		//CreateDevControls ();
+		//Spawn();
 	}
 
 	// DEV PANEL
@@ -85,7 +85,7 @@ public class CollectableSpawner : MonoBehaviour {
 
 
 	void Start ()   {
-        
+        Spawn();
 	}
 
 

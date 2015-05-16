@@ -5,44 +5,47 @@ using System.Collections;
 public class Score : MonoBehaviour {
 
     private Text guiText;
-    private int score = 0;
     private Vector3 baseScale;
     private Color scoreColor;
 
     void Awake()
     {
         guiText = gameObject.GetComponent<Text>();
+        baseScale = Vector3.one;
     }
 
 	// Use this for initialization
 	void Start () {
-        guiText.text = score.ToString();
-        baseScale = transform.localScale;
+        ResetScore();
 	}
 
-    public void ChangeScore(int amount)
+    public void SetBadScore(int amount)
     {
         transform.localScale = baseScale;
         StopAllCoroutines();
-        scoreColor = amount > 0 ? Color.green : Color.red;    
-        
+        scoreColor = Color.red;
+
         StartCoroutine("ChangeEffect");
 
-        score += amount;
-        guiText.text = score.ToString();
+        guiText.text = amount.ToString();
+    }
+
+    public void SetGoodScore(int amount)
+    {
+        transform.localScale = baseScale;
+        StopAllCoroutines();
+        scoreColor = Color.green;
+
+        StartCoroutine("ChangeEffect");
+
+        guiText.text = amount.ToString();
     }
 
     public void ResetScore()
     {
-        score = 0;
-        guiText.text = score.ToString();
+        guiText.text = "0";
         transform.localScale = baseScale;
     }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
     IEnumerator ChangeEffect()
     {

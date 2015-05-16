@@ -91,11 +91,11 @@ public class PlayerController : MonoBehaviour {
         //display wrong direction sign
         if (dirCounter > 1.0f && !isOutside)
         {
-            Scene.GlobalInstance.SetWrongWayMsg(true);
+            Messenger<bool>.Invoke(UFOEvents.PlayerWrongWay, true);
         }
         else
         {
-            Scene.GlobalInstance.SetWrongWayMsg(false);
+            Messenger<bool>.Invoke(UFOEvents.PlayerWrongWay, false);
         }
     }
 
@@ -148,7 +148,11 @@ public class PlayerController : MonoBehaviour {
             Collectable.CollectType colT = curItem.GetComponent<Collectable>().collectType;
 
             curItem.SendMessage("SetBeam", transform);
-            Scene.GlobalInstance.ScoreCollectible(colT);
+
+            if (colT == Collectable.CollectType.Bad)
+                Messenger.Invoke(UFOEvents.PlayerFail);
+            else
+                Messenger.Invoke(UFOEvents.PlayerScore);
 
             items.Remove(curItem);
             SetNextItem();
@@ -163,7 +167,7 @@ public class PlayerController : MonoBehaviour {
 
         if (axis.sqrMagnitude > 0.00001f)
         {
-           axis = axis.normalized * maxSpeed;
+           axis = Vector3.ClampMagnitude(axis,1.0f) * maxSpeed;
         }
 		//axis *= maxSpeed;
 
@@ -212,7 +216,7 @@ public class PlayerController : MonoBehaviour {
 
             if (index == curveIndex)
             {
-                Scene.GlobalInstance.SetOutsideTrackMsg(false);
+                Messenger<bool>.Invoke(UFOEvents.PlayerOutside, false);
                 isOutside = false;
             }
 
@@ -221,7 +225,7 @@ public class PlayerController : MonoBehaviour {
         else if (other.tag == "Finish" && visitedCurves.Count == track.CurveCount)
         {
            //The player traversed the whole track - we can finish now
-           Scene.GlobalInstance.FinishStage(0);
+           //Scene.GlobalInstance.FinishStage(0);
         }
     }
 
@@ -234,7 +238,7 @@ public class PlayerController : MonoBehaviour {
             if (index == curveIndex)
             {
                 isOutside = true;
-                Scene.GlobalInstance.SetOutsideTrackMsg(true);
+                Messenger<bool>.Invoke(UFOEvents.PlayerOutside, true);
             }
 
             track.SendMessage("EnableCurve", index);

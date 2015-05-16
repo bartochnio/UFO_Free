@@ -19,9 +19,12 @@ public class HUD : MonoBehaviour {
 
 	}
 
-    public void ChangeScore(int amount)
+    public void ChangeScore(int amount, bool good)
     {
-        scoreText.ChangeScore(amount);
+        if (good)
+            scoreText.SetGoodScore(amount);
+        else
+            scoreText.SetBadScore(amount);
     }
 
     public void ResetScore()
@@ -41,6 +44,6 @@ public class HUD : MonoBehaviour {
 
     private void WarningTimeFinished()
     {
-        Scene.GlobalInstance.FinishStage(0);
+       //Scene.GlobalInstance.FinishStage(0);
     }
 }

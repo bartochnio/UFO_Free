@@ -6,6 +6,16 @@ public class CameraController : MonoBehaviour {
     public float speed = 10.0f;
     public Transform target;
 
+    void OnEnable()
+    {
+        Messenger.AddListener(UFOEvents.PlayerFail, Shake);
+    }
+
+    void OnDisable()
+    {
+        Messenger.RemoveListener(UFOEvents.PlayerFail, Shake);
+    }
+
 	// Use this for initialization
 	void Start () {
 	
