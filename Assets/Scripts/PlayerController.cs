@@ -201,7 +201,8 @@ public class PlayerController : MonoBehaviour {
         if (items.Count > 0)
         {
             curItem = items[items.Count - 1];
-            curItem.SendMessage("SetFlash");
+            if (curItem != null)
+                curItem.SendMessage("SetFlash");
         }
 
         else
