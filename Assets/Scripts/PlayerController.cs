@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour {
     public float maxSpeed = 10.0f;
     public BezierSpline track;
     public float timer = 2.0f;
+	public float maxSwayOffRoad = 2.0f;
 
     //(Kamil): I know it's ugly as hell - will refactor ;)
     private float dirCounter = 0.0f;
@@ -194,6 +195,23 @@ public class PlayerController : MonoBehaviour {
         velocity.y = Mathf.Lerp(velocity.y, axis.y, speed * Time.deltaTime);
         velocity = Vector2.ClampMagnitude(velocity, maxSpeed);
         transform.position += (Vector3)velocity * Time.deltaTime;
+
+		// limit swaying off the road
+		{
+			float t = 0.0f;
+			Vector2 closestPoint = track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
+			Vector2 D = closestPoint - (Vector2)transform.position;
+
+			float magSqr = D.sqrMagnitude;
+			if (magSqr > maxSwayOffRoad * maxSwayOffRoad)
+			{
+				float mag = Mathf.Sqrt (magSqr);
+				float magInv = 1.0f / mag;
+				Vector2 dir = D * magInv;
+
+				transform.position += (Vector3)dir * (mag - maxSwayOffRoad);
+			}
+		}
     }
 
     void SetNextItem()
