@@ -12,6 +12,9 @@ public class ControlPointManip : MonoBehaviour {
 
 
 	void OnMouseDown () {
+		if (LevelObject.GlobalInstance.GetGUIState () != LevelObject.GUIState.EditorControls)
+			return;
+
 		Manipulated = PositionManip.GlobalInstance.BeginManipulation (gameObject);
 		PrevPos = LevelObject.GlobalInstance.GetControlPoint (ControlPointIndex);
 	}

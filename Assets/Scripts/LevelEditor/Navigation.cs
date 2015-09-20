@@ -16,6 +16,9 @@ public class Navigation : MonoBehaviour {
 	}
 
 	void ApplyZoom () {
+		if (LevelObject.GlobalInstance.GetGUIState () != LevelObject.GUIState.EditorControls)
+			return;
+
 		Camera cam = Camera.main;
 
 		float mouseWheel = Input.GetAxis ("Mouse ScrollWheel");
@@ -29,6 +32,9 @@ public class Navigation : MonoBehaviour {
 	}
 
 	void ApplyPan () {
+		if (LevelObject.GlobalInstance.GetGUIState () != LevelObject.GUIState.EditorControls)
+			return;
+
 		if (MMBDown && !Input.GetMouseButton (1)) {
 			MMBDown = false;
 			PositionManip.GlobalInstance.EndManipulation ();

@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Xml;
+using System.Xml.Linq;
+using System.IO;
+using System.Text;
 
 public class LevelObject : MonoBehaviour {
 	static private LevelObject globalInstance;
@@ -33,60 +37,481 @@ public class LevelObject : MonoBehaviour {
 	Bounds				GridBounds;
 	bool				SnapToGrid;
 
+	string				currentLevelFilename = null;
+	bool				modified = false;
+	bool				isLoading = false;
+
+	FileInfo[]			files;
+	Vector2				scrollPosition;
+	GameObject			canvas;
+	GameObject			loopToggle;
+
+
+	enum WarningResult {
+		Undecided,
+		Yes,
+		No
+	}
+	GUIState			nextStateAfterWarning;
+	string				warningText = "";
+	WarningResult		warningResult;
+
+	string				enterFilenameStr = "";
+
 
 	void Awake () {
 		globalInstance = this;
 	}
 
-	void Start () {
-		UndoRedoSys.Clear ();
-		LastControlPointManip = CreateControlPointManip (transform, Vector3.zero, 0);
-		Initialize ();
+	void OnDestroy() {
+		globalInstance = null;
+	}
 
+	void Start () {
 		GridBounds = GridMeshRenderer.bounds;
 		GridMaterial.mainTextureScale = GridBounds.max;
+
+		canvas = GameObject.Find ("Canvas");
+		loopToggle = canvas.transform.FindChild ("Toggle").gameObject;
+
+		Load (null);
 	}
 
 	void Update () {
-		if (Input.GetKeyUp (KeyCode.Z)) {
-			if (Input.GetKey (KeyCode.LeftCommand) && Input.GetKey (KeyCode.LeftShift)) {
+		if (guiState == GUIState.EditorControls) {
+			if (Input.GetKeyUp (KeyCode.Z)) {
+				if (Input.GetKey (KeyCode.LeftCommand) && Input.GetKey (KeyCode.LeftShift)) {
+					
+					UndoRedoSys.Redo ();
+				} else if (Input.GetKey (KeyCode.LeftCommand)) {
+					
+					UndoRedoSys.Undo ();
 
-				UndoRedoSys.Redo ();
+					if (UndoRedoSys.GetUndoCommandCount () == 0) {
+						modified = false;
+					}
+				}
 			}
-			else if (Input.GetKey (KeyCode.LeftCommand)) {
-
-				UndoRedoSys.Undo ();
+		} else if (guiState == GUIState.LoadFileDialog) {
+			if (Input.GetKeyDown (KeyCode.Escape)) {
+				guiState = GUIState.EditorControls;
+				canvas.SetActive (true);
+			}
+		} else if (guiState == GUIState.SaveFileDialog) {
+			if (Input.GetKeyDown (KeyCode.Escape)) {
+				guiState = GUIState.EditorControls;
+				canvas.SetActive (true);
 			}
 		}
+		else if (guiState == GUIState.Warning) {
+			if (Input.GetKeyDown (KeyCode.Escape)) {
+				warningResult = WarningResult.No;
+			}
+			if (warningResult != WarningResult.Undecided) {
+				if (warningResult == WarningResult.No) {
+					guiState = GUIState.EditorControls;
+					canvas.SetActive (true);
+				}
+				else if (nextStateAfterWarning == GUIState.LoadFileDialog) {
+					scrollPosition = Vector2.zero;
+					guiState = GUIState.LoadFileDialog;
+				}
+				else if (nextStateAfterWarning == GUIState.NewFile) {
+					New ();
+					guiState = GUIState.EditorControls;
+				}
+			}
+		}
+	}
+
+	public enum GUIState
+	{
+		EditorControls,
+		LoadFileDialog,
+		SaveFileDialog,
+		NewFile,
+		Warning
+	}
+	GUIState guiState = GUIState.EditorControls;
+
+	public GUIState GetGUIState() {
+		return guiState;
 	}
 
 	void OnGUI () {
 		GUI.contentColor = Color.black;
+
+		switch (guiState) {
+		case GUIState.EditorControls:
 		{
-			Rect r = new Rect (Screen.width - 100, 0, 100, 30);
+			{
+				Rect r = new Rect (Screen.width - 100, 0, 100, 30);
 
-			if (GUI.Button (r, "Undo count: " + UndoRedoSys.GetUndoCommandCount ())) {
-				UndoRedoSys.Undo ();
-			}
-			r.y += 35;
+				if (GUI.Button (r, "Undo count: " + UndoRedoSys.GetUndoCommandCount ())) {
+					UndoRedoSys.Undo ();
 
-			if (GUI.Button (r, "Redo count: " + UndoRedoSys.GetRedoCommandCount ())) {
-				UndoRedoSys.Redo ();
+					if (UndoRedoSys.GetUndoCommandCount () == 0) {
+						modified = false;
+					}
+				}
+				r.y += 35;
+
+				if (GUI.Button (r, "Redo count: " + UndoRedoSys.GetRedoCommandCount ())) {
+					UndoRedoSys.Redo ();
+				}
+				r.y += 35;
+
+				r.y += 35;
+				if (GUI.Button (r, "New")) {
+					if (modified) {
+						warningResult = WarningResult.Undecided;
+						guiState = GUIState.Warning;
+						warningText = "Do you want to discard changes to the current level?";
+						nextStateAfterWarning = GUIState.NewFile;
+					}
+					else {
+						New ();
+					}
+				}
+				r.y += 35;
+
+				GUI.contentColor = modified? Color.white : Color.black;
+				if (GUI.Button (r, "Save")) {
+					if (currentLevelFilename == null)
+					{
+						enterFilenameStr = "";
+						canvas.SetActive (false);
+						files = new System.IO.DirectoryInfo(Application.persistentDataPath).GetFiles();
+						guiState = GUIState.SaveFileDialog;
+					}
+					else {
+						Save ();
+						modified = false;
+					}
+				}
+				r.y += 35;
+				GUI.contentColor = Color.black;
+
+				if (GUI.Button (r, "Save As")) {
+					enterFilenameStr = "";
+					canvas.SetActive (false);
+					files = new System.IO.DirectoryInfo(Application.persistentDataPath).GetFiles();
+					guiState = GUIState.SaveFileDialog;
+				}
+				r.y += 35;
+
+				if (GUI.Button (r, "Open")) {
+					canvas.SetActive (false);
+					files = new System.IO.DirectoryInfo(Application.persistentDataPath).GetFiles();
+
+					if (modified) {
+						warningResult = WarningResult.Undecided;
+						guiState = GUIState.Warning;
+						warningText = "Do you want to discard changes to the current level?";
+						nextStateAfterWarning = GUIState.LoadFileDialog;
+					}
+					else {
+						guiState = GUIState.LoadFileDialog;
+					}
+				}
+				r.y += 35;
 			}
-			r.y += 35;
+
+			GUI.Box (new Rect (0, Screen.height - 25, 100, Screen.height), "Curve " + (SelectedCurve + 1) + " of " + Sections.Count);
+
+			SnapToGrid = GUI.Toggle (new Rect (Screen.width - 50, Screen.height - 25, 50, 25), SnapToGrid, "Snap");
 		}
+		break;
 
-		GUI.Box (new Rect (0, Screen.height - 25, 100, Screen.height), "Curve " + (SelectedCurve + 1) + " of " + Sections.Count);
+		case GUIState.LoadFileDialog:
+		{
+			GUI.contentColor = Color.white;
+			GUI.Box (new Rect(0, 0, Screen.width, 25), "");
+			GUI.Box (new Rect(0, 0, Screen.width, 25), Application.persistentDataPath);
+			GUI.contentColor = Color.black;
 
-		SnapToGrid = GUI.Toggle (new Rect (Screen.width - 50, Screen.height - 25, 50, 25), SnapToGrid, "Snap");
+			const float buttonWidth = 255;
+			const float buttonHeight = 30;
+			const float marginY = 10;
+			
+			Rect contentRect = new Rect(0, 0, buttonWidth, (files.Length + 1) * (buttonHeight + marginY));
+			
+			const float scrollViewWidth = buttonWidth + 30;
+			float scrollViewX = (Screen.width - scrollViewWidth) / 2;
+			float scrollViewY = 30;
+			
+			Rect scrollViewRect = new Rect (scrollViewX, scrollViewY, scrollViewWidth, Screen.height - scrollViewY);
+
+			scrollPosition = GUI.BeginScrollView(scrollViewRect, scrollPosition, contentRect);
+			{
+				GUI.Box (contentRect, "");
+
+				float btnX = 0;
+				float btnY = 0;
+
+				int filesDisplayed = 0;
+				for (int k = 0; k < files.Length; ++k)
+				{
+					if (files[k].Extension.ToLower() == ".ufo") {
+						++filesDisplayed;
+
+						string filename = Path.GetFileNameWithoutExtension(files[k].Name);
+						if (GUI.Button (new Rect(btnX, btnY, buttonWidth, buttonHeight), filename))
+						{
+							Load (filename);
+
+							guiState = GUIState.EditorControls;
+							canvas.SetActive (true);
+
+							break;
+						}
+
+						btnY += buttonHeight + marginY;
+					}
+				}
+				if (filesDisplayed == 0) {
+					GUI.Label (new Rect(btnX, btnY, buttonWidth, buttonHeight), "No files to list");
+				}
+			}
+			GUI.EndScrollView(true);
+
+			GUI.contentColor = Color.white;
+			GUI.Box(new Rect(0, 0, 50, 25), "OPEN");
+			GUI.Box(new Rect(0, 25, 130, 20), "");
+			GUI.Box(new Rect(0, 25, 130, 20), "Press Esc to cancel");
+		}
+		break;
+
+		case GUIState.SaveFileDialog:
+		{
+			GUI.contentColor = Color.white;
+			GUI.Box (new Rect(0, 0, Screen.width, 25), "");
+			GUI.Box (new Rect(0, 0, Screen.width, 25), Application.persistentDataPath);
+			GUI.contentColor = Color.black;
+
+			Rect textFieldRect = new Rect((Screen.width - 300) / 2 + 50, 30, 300, 30);
+
+			GUI.Box (new Rect(textFieldRect.x - 105, textFieldRect.y - 5, 510, 40), "");
+			GUI.Box (new Rect(textFieldRect.x - 100, textFieldRect.y, 100, 30), "Enter filename: ");
+			GUI.contentColor = Color.white;
+			enterFilenameStr = GUI.TextField (textFieldRect, enterFilenameStr);
+			GUI.contentColor = Color.black;
+			if (GUI.Button(new Rect(textFieldRect.x + 300, textFieldRect.y, 100, 30), "CONFIRM"))
+			{
+				SaveToLevelFile (enterFilenameStr);
+
+				guiState = GUIState.EditorControls;
+				canvas.SetActive(true);
+			}
+
+			const float buttonWidth = 255;
+			const float buttonHeight = 30;
+			const float marginY = 10;
+			
+			Rect contentRect = new Rect(0, 0, buttonWidth, (files.Length + 1) * (buttonHeight + marginY));
+			
+			const float scrollViewWidth = buttonWidth + 30;
+			float scrollViewX = (Screen.width - scrollViewWidth) / 2;
+			float scrollViewY = 100;
+			
+			Rect scrollViewRect = new Rect (scrollViewX, scrollViewY, scrollViewWidth, Screen.height - scrollViewY);
+			
+			scrollPosition = GUI.BeginScrollView(scrollViewRect, scrollPosition, contentRect);
+			{
+				GUI.Box (contentRect, "");
+
+				float btnX = 0;
+				float btnY = 0;
+				
+				for (int k = 0; k < files.Length; ++k)
+				{
+					if (files[k].Extension.ToLower() == ".ufo") {
+						string filename = Path.GetFileNameWithoutExtension(files[k].Name);
+						if (GUI.Button (new Rect(btnX, btnY, buttonWidth, buttonHeight), filename))
+						{
+							enterFilenameStr = filename;
+						}
+						
+						btnY += buttonHeight + marginY;
+					}
+				}
+			}
+			GUI.EndScrollView(true);
+
+			GUI.contentColor = Color.white;
+			GUI.Box(new Rect(0, 0, 50, 25), "SAVE");
+			GUI.Box(new Rect(0, 25, 130, 20), "");
+			GUI.Box(new Rect(0, 25, 130, 20), "Press Esc to cancel");
+		}
+		break;
+
+		case GUIState.Warning:
+		{
+			GUI.contentColor = Color.white;
+			float W = 400;
+			float H = 100;
+			GUI.Box(new Rect((Screen.width - W) / 2, (Screen.height - H) / 2, W, 25), "");
+			GUI.Box(new Rect((Screen.width - W) / 2, (Screen.height - H) / 2, W, H), "Warning");
+
+			GUI.Label(new Rect((Screen.width - W + 10) / 2, (Screen.height - H + 35) / 2 + 10, W - 10, 30), warningText);
+
+			if (GUI.Button(new Rect((Screen.width - W) / 2 + 80, (Screen.height - H) / 2 + 60, 100, 30), "Yes"))
+			{
+				warningResult = WarningResult.Yes;
+			}
+
+			if (GUI.Button(new Rect((Screen.width - W) / 2 + 220, (Screen.height - H) / 2 + 60, 100, 30), "No"))
+			{
+				warningResult = WarningResult.No;
+			}
+		}
+		break;
+		} // end switch
 	}
 
+	public void New()
+	{
+		Load (null);
+	}
 
-	void Initialize () {
-		AddSection (0);
-		RebuildSection (0);
+	public bool Load (string levelFilename)
+	{
+		isLoading = true;
+		ResetMe();
+		
+		BezierSpline spline = GetComponent <BezierSpline> ();
+		if (spline == null)
+			return false;
+		
+		if (!LoadFromLevelFile (levelFilename)) {
+			spline.Reset ();
+		}
 		
 		SelectedCurve = 0;
+		Initialize ();
+
+		currentLevelFilename = levelFilename;
+		modified = false;
+
+		isLoading = false;
+		return true;
+	}
+
+	bool LoadFromLevelFile (string levelFilename) {
+		UndoRedoSys.Clear ();
+
+		BezierSpline spline = GetComponent <BezierSpline> ();
+		if (spline == null)
+			return false;
+
+		if (levelFilename == null)
+			return false;
+
+		try {
+			string sepa = "" + System.IO.Path.DirectorySeparatorChar;
+			string fullPath = Application.persistentDataPath + sepa + levelFilename + ".ufo";
+			string fileContents = System.IO.File.ReadAllText (fullPath);
+
+			XDocument doc = XDocument.Parse (fileContents);
+			if (doc == null) return false;
+			if (doc.Root == null) return false;
+
+			XElement splineElem = doc.Root.Element("spline");
+			if (splineElem == null) return false;
+
+			spline.Loop = false;
+			if (!spline.LoadFromXmlElement(splineElem)) return false;
+
+			loopToggle.GetComponent<UnityEngine.UI.Toggle>().isOn = spline.Loop;
+
+			return true;
+		}
+		catch (System.Exception e) {
+			Debug.Log(e.Message);
+		}
+
+		return false;
+	}
+
+	public void Save ()
+	{
+		SaveToLevelFile (currentLevelFilename);
+	}
+
+	public void SaveAs(string levelFilename)
+	{
+		SaveToLevelFile (levelFilename);
+	}
+
+	bool SaveToLevelFile(string levelFilename)
+	{
+		if (levelFilename == null)
+			return false;
+
+		BezierSpline spline = GetComponent <BezierSpline> ();
+		if (spline == null)
+			return false;
+
+		string sepa = "" + System.IO.Path.DirectorySeparatorChar;
+		string fullPath = Application.persistentDataPath + sepa + levelFilename + ".ufo";
+
+		try {
+			StringBuilder output = new StringBuilder();
+
+			XmlWriterSettings ws = new XmlWriterSettings();
+			ws.Indent = true;
+			ws.Encoding = Encoding.UTF8;
+			using (XmlWriter writer = XmlWriter.Create(output, ws))
+			{
+				writer.WriteStartElement("level");
+				{
+					writer.WriteAttributeString("version", "1.0");
+
+					spline.WriteXml(writer);
+				}
+				writer.WriteEndElement();
+			}
+
+			System.IO.File.WriteAllText( fullPath, output.ToString () );
+
+			modified = false;
+			return true;
+
+		} catch (System.Exception e) {
+			Debug.Log (e.Message);
+		}
+
+		return false;
+	}
+
+	void ResetMe()
+	{
+		if (LastControlPointManip != null)
+			GameObject.Destroy (LastControlPointManip.gameObject);
+
+		foreach(Section sec in Sections)
+		{
+			GameObject.Destroy(sec.geometry);
+			foreach (ControlPointManip manip in sec.manipulators)
+			{
+				GameObject.Destroy(manip.gameObject);
+			}
+		}
+		Sections.Clear ();
+	}
+
+	void Initialize () {
+		BezierSpline spline = GetComponent <BezierSpline> ();
+		if (spline == null)
+			return;
+
+		LastControlPointManip = CreateControlPointManip (transform, Vector3.zero, 0);
+
+		for (int k = 0; k < spline.CurveCount; ++k) {
+			AddSection (3 * k);
+			RebuildSection (k);
+		}
+
 		UpdateHull ();
 	}
 
@@ -118,6 +543,8 @@ public class LevelObject : MonoBehaviour {
 		
 		if (pushUndo)
 			UndoRedoSys.PushCommand (new AppendCurveCommand (lastControlPoint, lastPoint, secondLastPoint));
+
+		modified = true;
 	}
 
 	public void DeleteLastCurve (bool pushUndo = true) {
@@ -197,6 +624,8 @@ public class LevelObject : MonoBehaviour {
 
 		if (pushUndo)
 			UndoRedoSys.PushCommand (new InsertCurveCommand (CurveIndex, prevPoints));
+
+		modified = true;
 	}
 
 	public void DeleteSelectedCurve () {
@@ -208,10 +637,6 @@ public class LevelObject : MonoBehaviour {
 			return;
 		if (CurveIndex < 0 || CurveIndex >= Sections.Count)
 			return;
-		/*if (CurveIndex == 0) {
-			DeleteFirstCurve ();
-			return;
-		}*/
 
 		bool IsLastCurve = CurveIndex == Sections.Count - 1;
 		
@@ -268,6 +693,8 @@ public class LevelObject : MonoBehaviour {
 
 		if (pushUndo)
 			UndoRedoSys.PushCommand (new DeleteCurveCommand (CurveIndex, prevPoints, IsLastCurve));
+
+		modified = true;
 	}
 
 	void DeleteFirstCurve () {
@@ -282,6 +709,9 @@ public class LevelObject : MonoBehaviour {
 	}
 
 	public void ToggleLoop2 (bool pushUndo = false) { // HACK: used by ToggleLoopCommand undo/redo command
+		if (isLoading)
+			return;
+
 		BezierSpline spline = GetComponent <BezierSpline> ();
 		if (spline == null)
 			return;
@@ -296,6 +726,8 @@ public class LevelObject : MonoBehaviour {
 
 		if (pushUndo)
 			UndoRedoSys.PushCommand (new ToggleLoopCommand (ToggleUI));
+
+		modified = true;
 	}
 
 
@@ -308,6 +740,9 @@ public class LevelObject : MonoBehaviour {
 	}
 
 	public void MoveControlPoint (int pointIndex, Vector3 pos) {
+		if (!canvas.activeSelf)
+			return;
+
 		BezierSpline spline = GetComponent <BezierSpline> ();
 		if (spline == null)
 			return;
@@ -354,6 +789,8 @@ public class LevelObject : MonoBehaviour {
 		}
 
 		UpdateHull ();
+
+		modified = true;
 	}
 
 	void AddSection (int firstCtrlPt, int atIndex = -1) {

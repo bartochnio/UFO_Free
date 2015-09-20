@@ -2,6 +2,9 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Linq;
+using System.Text;
 
 public class BezierSpline : MonoBehaviour {
 
@@ -341,4 +344,96 @@ public class BezierSpline : MonoBehaviour {
             curveBounds[i].bounds.Encapsulate(points[idx + 3]);
         }
     }
+
+
+	static char[] PointsSepa = new char[] {' '};
+
+	public void WriteXml(XmlWriter writer)
+	{
+		writer.WriteStartElement("spline");
+		{
+			writer.WriteStartElement ("points");
+			{
+				writer.WriteAttributeString ("count", points.Length.ToString ());
+
+				StringBuilder pointsStr = new StringBuilder ();
+				for (int p = 0; p < points.Length - 1; ++p) {
+					Vector3 pt = points [p];
+					pointsStr.Append (pt.x.ToString ());
+					pointsStr.Append (PointsSepa);
+					pointsStr.Append (pt.y.ToString ());
+					pointsStr.Append (PointsSepa);
+					pointsStr.Append (pt.z.ToString ());
+					pointsStr.Append (PointsSepa);
+				}
+				if (points.Length > 0) {
+					Vector3 pt = points [points.Length - 1];
+					pointsStr.Append (pt.x.ToString ());
+					pointsStr.Append (PointsSepa);
+					pointsStr.Append (pt.y.ToString ());
+					pointsStr.Append (PointsSepa);
+					pointsStr.Append (pt.z.ToString ());
+				}
+
+				writer.WriteValue (pointsStr.ToString ());
+			}
+			writer.WriteEndElement ();
+
+			writer.WriteStartElement ("props");
+			{
+				writer.WriteElementString ("loop", loop.ToString ());
+				writer.WriteElementString ("width", meshWidth.ToString ());
+
+			}
+			writer.WriteEndElement ();
+		}
+		writer.WriteEndElement ();
+	}
+
+
+	public bool LoadFromXmlElement(XElement element)
+	{
+		XElement ptsElem = element.Element ("points");
+
+		int count = 0;
+		if (!int.TryParse (ptsElem.Attribute ("count").Value, out count))
+			return false;
+
+		string[] floats = ptsElem.Value.Split(PointsSepa);
+		if (floats.Length / 3 != count)
+			return false;
+
+		points = new Vector3[count];
+
+		for (int k = 0; k < count; ++k)
+		{
+			int i = 3 * k;
+			points[k] = new Vector3(float.Parse(floats[i + 0]), float.Parse(floats[i + 1]), float.Parse(floats[i + 2]));
+		}
+
+		XElement propsElem = element.Element("props");
+		if (propsElem != null)
+		{
+			XElement loopElem = propsElem.Element("loop");
+			if (loopElem != null)
+			{
+				loop = bool.Parse(loopElem.Value);
+			}
+			else loop = false;
+
+			XElement widthElem = propsElem.Element ("width");
+			if (widthElem != null)
+			{
+				meshWidth = float.Parse(widthElem.Value);
+			}
+			else meshWidth = 1.0f;
+		}
+		else {
+			loop = false;
+			meshWidth = 1.0f;
+		}
+
+		GenerateBounds();
+		return true;
+	}
 }
