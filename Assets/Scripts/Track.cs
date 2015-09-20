@@ -40,7 +40,6 @@ public class Track : MonoBehaviour {
             meshGOs[i] = new GameObject(i.ToString());
             meshGOs[i].transform.SetParent(transform);
 
-            GenerateCurveMesh(i, builder);
             GenerateCurveMesh(spline, i, builder);
 
             Mesh mesh = builder.CreateMesh();
@@ -56,7 +55,6 @@ public class Track : MonoBehaviour {
         }
     }
 
-    void GenerateCurveMesh(int index, MeshBuilder builder)
     public static void GenerateCurveMesh(BezierSpline spline, int index, MeshBuilder builder)
     {
         float curveLen = spline.GetCurveLength(index, 100);
