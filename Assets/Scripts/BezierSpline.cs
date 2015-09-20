@@ -54,6 +54,42 @@ public class BezierSpline : MonoBehaviour {
         return points[index];
     }
 
+	public void DeletePoints (int start, int count) {
+		Vector3[] newPoints = new Vector3[points.Length - 3];
+
+		for (int k = 0; k < start; ++k) {
+			newPoints [k] = points [k];
+		}
+
+		for (int k = start + 3; k < points.Length; ++k) {
+			newPoints [k - 3] = points [k];
+		}
+
+		points = newPoints;
+	}
+
+	public void InsertPointsAt (int start, Vector3[] pts) {
+		if (pts.Length == 0)
+			return;
+
+		Vector3[] newPoints = new Vector3 [points.Length + pts.Length];
+		int j = 0;
+
+		for (int k = 0; k < start; ++k) {
+			newPoints [j++] = points [k];
+		}
+
+		for (int k = 0; k < pts.Length; ++k) {
+			newPoints [j++] = pts [k];
+		}
+
+		for (int k = start; k < points.Length; ++k) {
+			newPoints [j++] = points [k];
+		}
+
+		points = newPoints;
+	}
+
     //TODO: change the ref argument
     public Vector3 GetClosestPointToACurve(int idx, Vector3 p, ref float t)
     {
