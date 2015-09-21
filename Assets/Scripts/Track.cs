@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 public class Track : MonoBehaviour {
+	static public bool lauchFromEditorHack = false;
+	static public string levelToLoadHack = null;
 
     BezierSpline spline;
     GameObject[] meshGOs;
@@ -10,10 +13,60 @@ public class Track : MonoBehaviour {
 
 	void Start () 
     {
-        spline = GetComponent<BezierSpline>();
+		spline = GetComponent<BezierSpline>();
+
+		LoadLevel (levelToLoadHack);
+
         GenerateMesh();
         GenerateCollider();
     }
+
+	void OnGUI () {
+		if (lauchFromEditorHack) {
+			if (GUI.Button (new Rect (Screen.width - 150, 0, 150, 30), "Editor")) {
+				Application.LoadLevel ("LevelEditor");
+			}
+		}
+	}
+
+	bool LoadLevel (string levelName) {
+		if (levelName == null)
+			return false;
+
+		string filename = levelName + ".ufo";
+		string sepa = "" + System.IO.Path.DirectorySeparatorChar;
+
+		List<string> paths = new List<string> ();
+		paths.Add (Application.persistentDataPath); // persistent data path
+
+		if (Application.platform == RuntimePlatform.IPhonePlayer) {
+			paths.Add (Application.dataPath.Replace (Application.productName + ".app/Data", "/Documents/"));
+		}
+
+		// look in persistent data path
+		//
+		foreach (string path in paths) {
+			string fullpath = path + sepa + filename;
+			if (System.IO.File.Exists (fullpath))
+			{
+				string fileContents = System.IO.File.ReadAllText (fullpath);
+
+				XDocument doc = XDocument.Parse (fileContents);
+				if (doc == null) return false;
+				if (doc.Root == null) return false;
+				
+				XElement splineElem = doc.Root.Element("spline");
+				if (splineElem == null) return false;
+				
+				spline.Loop = false;
+				if (!spline.LoadFromXmlElement(splineElem)) return false;
+
+				return true;
+			}
+		}
+
+		return false;
+	}
 
     void Update() 
     {

@@ -7,7 +7,7 @@ using System.IO;
 using System.Text;
 
 public class LevelObject : MonoBehaviour {
-	static private LevelObject globalInstance;
+	static private LevelObject globalInstance = null;
 	static public  LevelObject GlobalInstance { get { return globalInstance; } }
 
 	public Material		RoadMaterial;
@@ -37,7 +37,7 @@ public class LevelObject : MonoBehaviour {
 	Bounds				GridBounds;
 	bool				SnapToGrid;
 
-	string				currentLevelFilename = null;
+	static string		currentLevelFilename = null;
 	bool				modified = false;
 	bool				isLoading = false;
 
@@ -64,7 +64,7 @@ public class LevelObject : MonoBehaviour {
 	}
 
 	void OnDestroy() {
-		globalInstance = null;
+		//globalInstance = null;
 	}
 
 	void Start () {
@@ -74,7 +74,7 @@ public class LevelObject : MonoBehaviour {
 		canvas = GameObject.Find ("Canvas");
 		loopToggle = canvas.transform.FindChild ("Toggle").gameObject;
 
-		Load (null);
+		Load (currentLevelFilename);
 	}
 
 	void Update () {
@@ -215,6 +215,13 @@ public class LevelObject : MonoBehaviour {
 					}
 				}
 				r.y += 35;
+
+				r.y += 35;
+				if (GUI.Button (r, "PLAY")) {
+					Track.levelToLoadHack = currentLevelFilename;
+					Track.lauchFromEditorHack = true;
+					Application.LoadLevel ("Prototype");
+				}
 			}
 
 			GUI.Box (new Rect (0, Screen.height - 25, 100, Screen.height), "Curve " + (SelectedCurve + 1) + " of " + Sections.Count);
@@ -225,10 +232,12 @@ public class LevelObject : MonoBehaviour {
 
 		case GUIState.LoadFileDialog:
 		{
+			GUI.Box (new Rect(0, 0, Screen.width, Screen.height), "");
+
 			GUI.contentColor = Color.white;
 			GUI.Box (new Rect(0, 0, Screen.width, 25), "");
 			GUI.Box (new Rect(0, 0, Screen.width, 25), Application.persistentDataPath);
-			GUI.contentColor = Color.black;
+			//GUI.contentColor = Color.black;
 
 			const float buttonWidth = 255;
 			const float buttonHeight = 30;
@@ -275,7 +284,7 @@ public class LevelObject : MonoBehaviour {
 			}
 			GUI.EndScrollView(true);
 
-			GUI.contentColor = Color.white;
+			//GUI.contentColor = Color.white;
 			GUI.Box(new Rect(0, 0, 50, 25), "OPEN");
 			GUI.Box(new Rect(0, 25, 130, 20), "");
 			GUI.Box(new Rect(0, 25, 130, 20), "Press Esc to cancel");
@@ -284,10 +293,12 @@ public class LevelObject : MonoBehaviour {
 
 		case GUIState.SaveFileDialog:
 		{
+			GUI.Box (new Rect(0, 0, Screen.width, Screen.height), "");
+
 			GUI.contentColor = Color.white;
 			GUI.Box (new Rect(0, 0, Screen.width, 25), "");
 			GUI.Box (new Rect(0, 0, Screen.width, 25), Application.persistentDataPath);
-			GUI.contentColor = Color.black;
+			//GUI.contentColor = Color.black;
 
 			Rect textFieldRect = new Rect((Screen.width - 300) / 2 + 50, 30, 300, 30);
 
@@ -295,7 +306,7 @@ public class LevelObject : MonoBehaviour {
 			GUI.Box (new Rect(textFieldRect.x - 100, textFieldRect.y, 100, 30), "Enter filename: ");
 			GUI.contentColor = Color.white;
 			enterFilenameStr = GUI.TextField (textFieldRect, enterFilenameStr);
-			GUI.contentColor = Color.black;
+			//GUI.contentColor = Color.black;
 			if (GUI.Button(new Rect(textFieldRect.x + 300, textFieldRect.y, 100, 30), "CONFIRM"))
 			{
 				SaveToLevelFile (enterFilenameStr);
@@ -338,15 +349,22 @@ public class LevelObject : MonoBehaviour {
 			}
 			GUI.EndScrollView(true);
 
-			GUI.contentColor = Color.white;
+			//GUI.contentColor = Color.white;
 			GUI.Box(new Rect(0, 0, 50, 25), "SAVE");
 			GUI.Box(new Rect(0, 25, 130, 20), "");
 			GUI.Box(new Rect(0, 25, 130, 20), "Press Esc to cancel");
 		}
 		break;
 
+		case GUIState.NewFile:
+		{
+		}
+		break;
+
 		case GUIState.Warning:
 		{
+			GUI.Box (new Rect(0, 0, Screen.width, Screen.height), "");
+
 			GUI.contentColor = Color.white;
 			float W = 400;
 			float H = 100;

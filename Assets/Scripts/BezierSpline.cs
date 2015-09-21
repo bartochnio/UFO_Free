@@ -417,9 +417,9 @@ public class BezierSpline : MonoBehaviour {
 			XElement loopElem = propsElem.Element("loop");
 			if (loopElem != null)
 			{
-				loop = bool.Parse(loopElem.Value);
+				Loop = bool.Parse(loopElem.Value);
 			}
-			else loop = false;
+			else Loop = false;
 
 			XElement widthElem = propsElem.Element ("width");
 			if (widthElem != null)
@@ -429,7 +429,7 @@ public class BezierSpline : MonoBehaviour {
 			else meshWidth = 1.0f;
 		}
 		else {
-			loop = false;
+			Loop = false;
 			meshWidth = 1.0f;
 		}
 
