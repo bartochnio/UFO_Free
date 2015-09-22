@@ -436,4 +436,8 @@ public class BezierSpline : MonoBehaviour {
 		GenerateBounds();
 		return true;
 	}
+
+	public void Reverse () {
+		Array.Reverse (points);
+	}
 }

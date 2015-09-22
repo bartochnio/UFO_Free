@@ -224,7 +224,14 @@ public class LevelObject : MonoBehaviour {
 				}
 			}
 
-			GUI.Box (new Rect (0, Screen.height - 25, 100, Screen.height), "Curve " + (SelectedCurve + 1) + " of " + Sections.Count);
+			/*if (GUI.Button (new Rect(0, Screen.height - 95, 100, 30), "Reverse")) {
+				BezierSpline spline = GetComponent<BezierSpline>();
+				if (spline != null) {
+					spline.Reverse ();
+				}
+			}*/
+
+			GUI.Box (new Rect (0, Screen.height - 25, 100, 25), "Curve " + (SelectedCurve + 1) + " of " + Sections.Count);
 
 			SnapToGrid = GUI.Toggle (new Rect (Screen.width - 50, Screen.height - 25, 50, 25), SnapToGrid, "Snap");
 		}
@@ -309,7 +316,9 @@ public class LevelObject : MonoBehaviour {
 			//GUI.contentColor = Color.black;
 			if (GUI.Button(new Rect(textFieldRect.x + 300, textFieldRect.y, 100, 30), "CONFIRM"))
 			{
-				SaveToLevelFile (enterFilenameStr);
+				if (SaveToLevelFile (enterFilenameStr)) {
+					currentLevelFilename = enterFilenameStr;
+				}
 
 				guiState = GUIState.EditorControls;
 				canvas.SetActive(true);
