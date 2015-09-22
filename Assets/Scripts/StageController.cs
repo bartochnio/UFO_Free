@@ -3,6 +3,8 @@ using System.Collections;
 
 public class StageController : MonoBehaviour {
 
+    public int timePlayerOutside = 3;
+
     public HUD hud;
     public GameObject cockpit;
     public const int GoodPoints = 10;
@@ -68,7 +70,7 @@ public class StageController : MonoBehaviour {
     private void OnPlayerOutside(bool val)
     {
         if (val)
-            hud.ShowWarningMessage("GET BACK TO THE TRACK!", true, 3);
+            hud.ShowWarningMessage("GET BACK TO THE TRACK!", true, timePlayerOutside);
         else
             hud.HideWarning();
     }

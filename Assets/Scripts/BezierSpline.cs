@@ -104,7 +104,7 @@ public class BezierSpline : MonoBehaviour {
             float ct = i / (float)steps;
             Vector3 lineEnd = GetCurvePoint(idx, ct);
 
-            //Debug.DrawLine(lineStart, lineEnd, Color.cyan);
+           // Debug.DrawLine(lineStart, lineEnd, Color.cyan);
 
             Vector3 c = Utils.ClosestPoint(lineStart, lineEnd, p);
             if (Vector3.Distance(p, c) <= Vector3.Distance(p, closest))

@@ -68,8 +68,6 @@ public class PlayerController : MonoBehaviour {
         Respawn();
         arrow = transform.FindChild("Arrow").gameObject; //UNSAFE
         arrowSprite = arrow.GetComponent<SpriteRenderer>();
-
-        //UpdateTrackVisibility(curveIndex);
 	}
 
 
@@ -121,7 +119,6 @@ public class PlayerController : MonoBehaviour {
 
     void UpdateTrackVisibility(int index)
     {
-        //track.SendMessage("DisableTrack");
         visitedCurves.Add(curveIndex);
 
         curveIndex = index;
@@ -207,7 +204,7 @@ public class PlayerController : MonoBehaviour {
 			{
 				float mag = Mathf.Sqrt (magSqr);
 				float magInv = 1.0f / mag;
-				Vector2 dir = D * magInv;
+                Vector2 dir = D * magInv;
 
 				transform.position += (Vector3)dir * (mag - maxSwayOffRoad);
 			}
@@ -242,17 +239,17 @@ public class PlayerController : MonoBehaviour {
         {
             int index = int.Parse(other.gameObject.name);
 
-            if ((Mathf.Abs(index - curveIndex) == 1))
-                UpdateTrackVisibility(index);
-            else if (curveIndex == 0 && (index == track.CurveCount - 1))
-                UpdateTrackVisibility(index);
-            else if ((curveIndex == track.CurveCount - 1) && index == 0)
-                UpdateTrackVisibility(index);
-            
-            else if (index != curveIndex)
-                track.SendMessage("DisableCurve", index);
+            //if ((Mathf.Abs(index - curveIndex) == 1))
+            //    UpdateTrackVisibility(index);
+            //else if (curveIndex == 0 && (index == track.CurveCount - 1))
+            //    UpdateTrackVisibility(index);
+            //else if ((curveIndex == track.CurveCount - 1) && index == 0)
+            //    UpdateTrackVisibility(index);
 
-            if (index == curveIndex)
+            //else if (index != curveIndex)
+            //    track.SendMessage("DisableCurve", index);
+
+            if (index == curveIndex && isOutside)
             {
                 Messenger<bool>.Invoke(UFOEvents.PlayerOutside, false);
                 isOutside = false;
@@ -293,6 +290,29 @@ public class PlayerController : MonoBehaviour {
             else
                 items.Remove(other.gameObject);
         }
+    }
+
+    void OnPlayerCollisionEnter(Collider2D other)
+    {
+        if (other.tag == "Track")
+        {
+            int index = int.Parse(other.gameObject.name);
+
+            if ((Mathf.Abs(index - curveIndex) == 1))
+                UpdateTrackVisibility(index);
+            else if (curveIndex == 0 && (index == track.CurveCount - 1))
+                UpdateTrackVisibility(index);
+            else if ((curveIndex == track.CurveCount - 1) && index == 0)
+                UpdateTrackVisibility(index);
+
+            else if (index != curveIndex)
+                track.SendMessage("DisableCurve", index);
+        }
+    }
+
+    void OnPlayerCollisionExit(Collider2D other)
+    {
+
     }
 
     public delegate void TrackPartChangeDelegate(int currentIdx,int preIdx, int nextIdx);
