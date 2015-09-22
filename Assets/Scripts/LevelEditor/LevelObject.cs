@@ -233,6 +233,9 @@ public class LevelObject : MonoBehaviour {
 
 			GUI.Box (new Rect (0, Screen.height - 25, 100, 25), "Curve " + (SelectedCurve + 1) + " of " + Sections.Count);
 
+			string filename = currentLevelFilename ?? "";
+			GUI.Box (new Rect ((Screen.width - 200) / 2, Screen.height - 30, 200, 35), "Level: " + filename.ToUpper());
+
 			SnapToGrid = GUI.Toggle (new Rect (Screen.width - 50, Screen.height - 25, 50, 25), SnapToGrid, "Snap");
 		}
 		break;
