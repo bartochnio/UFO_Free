@@ -7,6 +7,8 @@ public class Track : MonoBehaviour {
 	static public bool lauchFromEditorHack = false;
 	static public string levelToLoadHack = null;
 
+    public GameObject finishLinePrefab;
+
     BezierSpline spline;
     GameObject[] meshGOs;
     Material material;
@@ -19,6 +21,8 @@ public class Track : MonoBehaviour {
 
         GenerateMesh();
         GenerateCollider();
+
+        CreateFinishLine();
     }
 
 	void OnGUI () {
@@ -28,6 +32,18 @@ public class Track : MonoBehaviour {
 			}
 		}
 	}
+
+    void CreateFinishLine()
+    {
+        float t = 0.5f;
+        int curveIndex = 0;
+
+        GameObject go = Instantiate(finishLinePrefab);
+        go.transform.position = spline.GetCurvePoint(curveIndex, t) + new Vector3(0.0f, 0.0f, -3.0f);
+
+        Vector3 tangent = spline.GetCurveVelocity(curveIndex, t);
+        go.transform.up = tangent.normalized;
+    }
 
 	bool LoadLevel (string levelName) {
 		if (levelName == null)
