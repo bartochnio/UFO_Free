@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour {
     private HashSet<int> visitedCurves = new HashSet<int>();
     private HashSet<int> collidingCurves = new HashSet<int>();
     private Vector3 closestPoint;
+    private float curT = 0.0f;
 
     int curveIndex = 0;
     public int GetIndex() { return curveIndex; }
@@ -75,6 +76,7 @@ public class PlayerController : MonoBehaviour {
             {
                 p = cp;
                 index = i;
+                curT = t;
             }
         }
 
@@ -140,19 +142,18 @@ public class PlayerController : MonoBehaviour {
 
     void CheckDirection()
     {
-        float t = 0.0f;
-        Vector2 curveTangent = track.GetCurveVelocity(curveIndex, t).normalized;
+        Vector2 curveTangent = track.GetCurveVelocity(curveIndex, curT).normalized;
         if (velocity.sqrMagnitude > 0.5f)
         {
             float p = Vector2.Dot(velocity.normalized, curveTangent);
-            if (p < -0.2)
+            if (p < -0.2f)
                 dirCounter += Time.deltaTime;
             else
                 dirCounter = 0.0f;
         }
         else
             dirCounter = 0.0f;
-        
+
         //display wrong direction sign
         if (dirCounter > 1.0f && !isOutside)
         {

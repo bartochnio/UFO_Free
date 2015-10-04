@@ -11,6 +11,7 @@ public class StageController : MonoBehaviour {
     public const int BadPoints = -10;
 
     private int score = 0;
+    private bool playerWrongWay = false;
 
     //Events
     void OnEnable()
@@ -79,10 +80,12 @@ public class StageController : MonoBehaviour {
 
     private void OnPlayerWrongWay(bool val)
     {
-        if (val)
+        if (val && !playerWrongWay)
             hud.ShowWarningMessage("WRONG WAY!", true, 0);
-        else
+        else if (!val && playerWrongWay)
             hud.HideWarning();
+
+        playerWrongWay = val;
     }
 
     private void OnGameOver()
@@ -94,6 +97,8 @@ public class StageController : MonoBehaviour {
 
     private void OnFinished()
     {
+        playerWrongWay = false;
+
         hud.ShowWarningMessage("FINISHED!", false, 0);
         cockpit.SetActive(false);
         hud.Pause(true);
