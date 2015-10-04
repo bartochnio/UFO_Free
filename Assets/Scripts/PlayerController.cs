@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour {
     private Vector3 closestPoint;
 
     int curveIndex = 0;
+    public int GetIndex() { return curveIndex; }
 
     public void Respawn()
     {
@@ -310,9 +311,6 @@ public class PlayerController : MonoBehaviour {
 
         return false;
     }
-
-    public delegate void TrackPartChangeDelegate(int currentIdx,int preIdx, int nextIdx);
-    public event TrackPartChangeDelegate TrackIndexChanged;
 
     //Event handlers
     private void OnGameOver()

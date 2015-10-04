@@ -232,6 +232,26 @@ public class BezierSpline : MonoBehaviour {
         return transform.TransformPoint(Bezier.GetPoint(points[i], points[i + 1], points[i + 2], points[i + 3], t));
     }
 
+    public Vector3 GetPoint(float t, ref int idx)
+    {
+        int i;
+        if (t >= 1.0f)
+        {
+            t = 1.0f;
+            i = points.Length - 4;
+        }
+        else
+        {
+            t = Mathf.Clamp01(t) * CurveCount;
+            i = (int)t;
+            t -= i;
+            i *= 3;
+        }
+
+        idx = i / 3;
+        return transform.TransformPoint(Bezier.GetPoint(points[i], points[i + 1], points[i + 2], points[i + 3], t));
+    }
+
     public Vector3 GetCurvePoint(int index, float t)
     {
         int idx = index * 3;

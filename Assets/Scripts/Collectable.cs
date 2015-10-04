@@ -66,10 +66,9 @@ public class Collectable : MonoBehaviour {
     {
         sprite = gameObject.GetComponent<SpriteRenderer>();
         circle = gameObject.GetComponent<CircleCollider2D>();
-
     }
 
-	IEnumerator Start () 
+	void Start() 
     {
         if (collectType == CollectType.Good)
             baseColor = Color.green * RenderSettings.ambientLight;
@@ -78,18 +77,7 @@ public class Collectable : MonoBehaviour {
 
         sprite.color = baseColor;
         state = State.idle;
-        curT = startT;
-
-        PlayerController ctrl = null;
-
-        while (ctrl == null)
-        {
-            ctrl = GameObject.FindObjectOfType<PlayerController>();
-            yield return new WaitForEndOfFrame();
-        }
-
-        ctrl.TrackIndexChanged += this.TrackPartChangedHandler;
-      
+        curT = startT;      
 	}
 	
 	void Update () 
@@ -102,7 +90,7 @@ public class Collectable : MonoBehaviour {
             else if (curT <= 0.0f)
                 curT = 1.0f;
 
-            Vector3 p = spline.GetPoint(curT);
+            Vector3 p = spline.GetPoint(curT, ref myIdx);
             p.z = 0.0f;
             transform.position = p;
 
@@ -110,8 +98,24 @@ public class Collectable : MonoBehaviour {
             float angle = Mathf.Rad2Deg * Mathf.Atan2(vel.y, vel.x);
             Quaternion rot = Quaternion.Euler(new Vector3(0.0f,0.0f,angle));
             transform.rotation = rot;
-        }
+
+            int playerIdx = player.GetIndex();
+            circle.enabled = indexIsValid(playerIdx);
+            GetComponent<Renderer>().enabled = indexIsValid(playerIdx);
+        }        
 	}
+
+    bool indexIsValid(int playerIndex)
+    {
+        if (playerIndex == 0 && (myIdx == spline.CurveCount - 1))
+            return true;
+        else if ((playerIndex == spline.CurveCount - 1) && myIdx == 0)
+            return true;
+        else if (Mathf.Abs(myIdx - playerIndex) <= 1)
+            return true;
+
+        return false;
+    }
 
     IEnumerator Beam()
     {
@@ -127,10 +131,6 @@ public class Collectable : MonoBehaviour {
             yield return null;
         }
 
-		// Moved from OnDestroy
-		PlayerController pc = GameObject.FindObjectOfType<PlayerController>();
-		pc.TrackIndexChanged -= this.TrackPartChangedHandler;
-        //
 		Destroy(gameObject);
     }
 
@@ -179,81 +179,5 @@ public class Collectable : MonoBehaviour {
         target = trg;
         StopAllCoroutines();
         StartCoroutine("Beam");
-    }
-    bool firstSet = true;
-    void OnTriggerEnter2D(Collider2D c)
-    {
-        //if (c.tag == "Track")
-        //{
-        //    PlayerController pc = FindObjectOfType<PlayerController>();
-
-        //    int idx = int.Parse(c.name);
-        //    int low = myIdx - 1;
-        //    if (low == -1) low = pc.track.CurveCount;
-        //    int high = myIdx + 1;
-        //    if (high > pc.track.CurveCount) high = 0;
-
-        //    if (idx != myIdx )
-        //    {
-        //        if (firstSet)
-        //        {
-        //            myIdx = idx;
-        //            //Debug.Log(name + " Moved to IDX " + idx);
-                   
-        //            int cur = pc.CurveIndex;
-        //            int p = pc.PrevIndex;
-        //            int n = pc.NextIndex;
-        //            TrackPartChangedHandler(cur, p, n);
-        //            firstSet = false;
-        //        }
-        //        else if ( (idx == high || idx == low))
-        //        {
-                   
-        //            {
-        //                myIdx = idx;
-        //                //Debug.Log(name + " Moved to IDX " + idx);
-                       
-        //                int cur = pc.CurveIndex;
-        //                int p = pc.PrevIndex;
-        //                int n = pc.NextIndex;
-        //                TrackPartChangedHandler(cur, p, n);
-        //            }
-        //        }
-                
-        //    }
-        //}
-    }
-    bool isVisible = true;
-
-    void TrackPartChangedHandler(int idx, int prvIdx, int nextIdx)
-    {
-        if (idx == myIdx || prvIdx == myIdx ||  nextIdx == myIdx )
-        {
-            if (!this.isVisible)
-            {
-                this.isVisible = true;
-                Color color = Color.white;
-                color.a = 1f;
-                GetComponent<SpriteRenderer>().material.SetColor("_Color", color);
-            }
-        }
-        else
-        {
-            if (this.isVisible)
-            {
-                this.isVisible = false;
-                Color c = Color.white;
-                c.a = 0.0f;
-                GetComponent<SpriteRenderer>().material.SetColor("_Color", c);
-            }
-        }
-    }
-    
-    void OnDestroy()
-    {
-		// Moved to Beam()
-		//
-        //PlayerController c = GameObject.FindObjectOfType<PlayerController>();
-        //c.TrackIndexChanged -= this.TrackPartChangedHandler;
     }
 }
