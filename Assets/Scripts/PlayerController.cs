@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour {
     public BezierSpline track;
     public float timer = 2.0f;
 	public float maxSwayOffRoad = 2.0f;
+    public Transform playerCollision;
 
     //(Kamil): I know it's ugly as hell - will refactor ;)
     private float dirCounter = 0.0f;
@@ -22,24 +23,10 @@ public class PlayerController : MonoBehaviour {
     private List<GameObject> items = new List<GameObject>();
 
     private HashSet<int> visitedCurves = new HashSet<int>();
+    private HashSet<int> collidingCurves = new HashSet<int>();
+    private Vector3 closestPoint;
 
     int curveIndex = 0;
-    public int CurveIndex
-    {
-        get { return curveIndex; }
-    }
-
-    int nextIndex = 0;
-    public int NextIndex
-    {
-        get { return nextIndex; }
-    }
-
-    int prevIndex = 0;
-    public int PrevIndex
-    {
-        get { return prevIndex; }
-    }
 
     public void Respawn()
     {
@@ -49,6 +36,11 @@ public class PlayerController : MonoBehaviour {
         curveIndex = 0;
 
         visitedCurves.Clear();
+        collidingCurves.Clear();
+
+        float t = 0.0f;
+        closestPoint = track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
+        collidingCurves.Add(curveIndex);
 
         paused = false;
     }
@@ -70,17 +62,38 @@ public class PlayerController : MonoBehaviour {
         arrowSprite = arrow.GetComponent<SpriteRenderer>();
 	}
 
+    Vector3 computeClosestPoint(ref int index)
+    {
+        float t = 0.0f;
+        Vector3 p = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        Vector3 cp;
+        foreach (int i in collidingCurves)
+        {
+            cp = track.GetClosestPointToACurve(i, transform.position, ref t);
+            if (Vector3.Distance(cp, transform.position) <= Vector3.Distance(p, transform.position))
+            {
+                p = cp;
+                index = i;
+            }
+        }
+
+        return p;
+    }
 
 	void Update () 
     {
+        closestPoint = computeClosestPoint(ref curveIndex);
+        playerCollision.position = closestPoint;
+        
         Move();
 
         if (paused)
             return;
 
-        ShowArrow();
+        UpdateArrow();
 
-		if (Input.GetButtonDown("Jump")) {
+		if (Input.GetButtonDown("Jump")) 
+        {
         	CollectItem();
 		}
 
@@ -90,10 +103,43 @@ public class PlayerController : MonoBehaviour {
         }
 	}
 
+    void UpdateArrow()
+    {
+        float s = 10.0f;
+        Vector2 dir = ((Vector2)closestPoint - (Vector2)transform.position).normalized;
+        arrow.transform.up = Vector3.Slerp(arrow.transform.up, dir, Time.deltaTime * s);
+        arrow.transform.position = Vector3.Lerp(arrow.transform.position, dir + (Vector2)transform.position, Time.deltaTime * s);
+        arrow.SetActive(isOutside);
+
+        if (!isOutside)
+        {
+            return;
+        }
+
+        arrowSprite.color = (Mathf.Sin(Time.time * 10.0f) * 0.5f + 0.5f) * Color.red;
+    }
+
+    public void CollectItem()
+    {
+        if (curItem != null)
+        {
+            Collectable.CollectType colT = curItem.GetComponent<Collectable>().collectType;
+
+            curItem.SendMessage("SetBeam", transform);
+
+            if (colT == Collectable.CollectType.Bad)
+                Messenger.Invoke(UFOEvents.PlayerFail);
+            else
+                Messenger.Invoke(UFOEvents.PlayerScore);
+
+            items.Remove(curItem);
+            SetNextItem();
+        }
+    }
+
     void CheckDirection()
     {
         float t = 0.0f;
-        track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
         Vector2 curveTangent = track.GetCurveVelocity(curveIndex, t).normalized;
         if (velocity.sqrMagnitude > 0.5f)
         {
@@ -117,65 +163,6 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void UpdateTrackVisibility(int index)
-    {
-        visitedCurves.Add(curveIndex);
-
-        curveIndex = index;
-        nextIndex = curveIndex;
-        nextIndex = (curveIndex + 1) % track.CurveCount;
-
-        prevIndex = curveIndex;
-        if (curveIndex > 0)
-            prevIndex = curveIndex - 1;
-        else
-            prevIndex = track.CurveCount - 1;
-
-        track.SendMessage("EnableCurve", prevIndex);
-        track.SendMessage("EnableCurve", curveIndex);
-        track.SendMessage("EnableCurve", nextIndex);
-    }
-
-    void ShowArrow()
-    {
-        arrow.SetActive(isOutside);
-        if (!isOutside)
-        {
-            arrow.transform.rotation = Quaternion.identity;
-            return;
-        }
-
-        float t = 0.0f;
-        Vector2 closestPoint = track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
-        Vector2 dir = (closestPoint - (Vector2)transform.position).normalized;
-        float angle = Mathf.Rad2Deg * Mathf.Atan2(dir.y, dir.x);
-
-        arrow.transform.localPosition = Vector3.zero;
-        Quaternion q = Quaternion.Euler(Vector3.forward * (-90.0f)) * Quaternion.Euler(Vector3.forward * angle);
-        arrow.transform.rotation = Quaternion.Slerp(arrow.transform.rotation, q, Time.deltaTime * 10.0f);
-        arrow.transform.localPosition = arrow.transform.TransformDirection(Vector3.up * 0.12f);
-
-        arrowSprite.color = (Mathf.Sin(Time.time * 10.0f) * 0.5f + 0.5f) * Color.red;
-    }
-
-    public void CollectItem()
-    {
-        if (curItem != null)
-        {
-            Collectable.CollectType colT = curItem.GetComponent<Collectable>().collectType;
-
-            curItem.SendMessage("SetBeam", transform);
-
-            if (colT == Collectable.CollectType.Bad)
-                Messenger.Invoke(UFOEvents.PlayerFail);
-            else
-                Messenger.Invoke(UFOEvents.PlayerScore);
-
-            items.Remove(curItem);
-            SetNextItem();
-        }
-    }
-
     void Move()
     {
         Vector2 axis = Vector3.zero;
@@ -194,21 +181,20 @@ public class PlayerController : MonoBehaviour {
         transform.position += (Vector3)velocity * Time.deltaTime;
 
 		// limit swaying off the road
-		{
-			float t = 0.0f;
-			Vector2 closestPoint = track.GetClosestPointToACurve(curveIndex, transform.position, ref t);
-			Vector2 D = closestPoint - (Vector2)transform.position;
+        if (isOutside)
+        {
+            Vector2 D = (Vector2)closestPoint - (Vector2)transform.position;
 
-			float magSqr = D.sqrMagnitude;
-			if (magSqr > maxSwayOffRoad * maxSwayOffRoad)
-			{
-				float mag = Mathf.Sqrt (magSqr);
-				float magInv = 1.0f / mag;
+            float magSqr = D.sqrMagnitude;
+            if (magSqr > maxSwayOffRoad * maxSwayOffRoad)
+            {
+                float mag = Mathf.Sqrt(magSqr);
+                float magInv = 1.0f / mag;
                 Vector2 dir = D * magInv;
 
-				transform.position += (Vector3)dir * (mag - maxSwayOffRoad);
-			}
-		}
+                transform.position += (Vector3)dir * (mag - maxSwayOffRoad);
+            }
+        }
     }
 
     void SetNextItem()
@@ -238,30 +224,22 @@ public class PlayerController : MonoBehaviour {
         else if (other.tag == "Track")
         {
             int index = int.Parse(other.gameObject.name);
-
-            //if ((Mathf.Abs(index - curveIndex) == 1))
-            //    UpdateTrackVisibility(index);
-            //else if (curveIndex == 0 && (index == track.CurveCount - 1))
-            //    UpdateTrackVisibility(index);
-            //else if ((curveIndex == track.CurveCount - 1) && index == 0)
-            //    UpdateTrackVisibility(index);
-
-            //else if (index != curveIndex)
-            //    track.SendMessage("DisableCurve", index);
-
             if (index == curveIndex && isOutside)
             {
                 Messenger<bool>.Invoke(UFOEvents.PlayerOutside, false);
                 isOutside = false;
             }
 
-            if (TrackIndexChanged != null) TrackIndexChanged(curveIndex, nextIndex, PrevIndex); 
+            if (indexIsValid(index))
+            {
+                visitedCurves.Add(index);
+            }
+            //if (TrackIndexChanged != null) TrackIndexChanged(curveIndex, nextIndex, PrevIndex);
         }
         else if (other.tag == "Finish" && visitedCurves.Count == track.CurveCount)
         {
-           //The player traversed the whole track - we can finish now
-           //Scene.GlobalInstance.FinishStage(0);
-            Messenger.Invoke(UFOEvents.GameOver);
+            //The player traversed the whole track - we can finish now
+            Messenger.Invoke(UFOEvents.PlayerFinished);
         }
     }
 
@@ -276,8 +254,6 @@ public class PlayerController : MonoBehaviour {
                 isOutside = true;
                 Messenger<bool>.Invoke(UFOEvents.PlayerOutside, true);
             }
-
-            track.SendMessage("EnableCurve", index);
         }
         else if(other.tag == "Collectable")
         {
@@ -298,21 +274,41 @@ public class PlayerController : MonoBehaviour {
         {
             int index = int.Parse(other.gameObject.name);
 
-            if ((Mathf.Abs(index - curveIndex) == 1))
-                UpdateTrackVisibility(index);
-            else if (curveIndex == 0 && (index == track.CurveCount - 1))
-                UpdateTrackVisibility(index);
-            else if ((curveIndex == track.CurveCount - 1) && index == 0)
-                UpdateTrackVisibility(index);
-
-            else if (index != curveIndex)
+            if (indexIsValid(index))
+            {
+                collidingCurves.Add(index);
+                track.SendMessage("EnableCurve", index);
+            }
+            else
                 track.SendMessage("DisableCurve", index);
         }
     }
 
     void OnPlayerCollisionExit(Collider2D other)
     {
+        if (other.tag == "Track")
+        {
+            int index = int.Parse(other.gameObject.name);
 
+            if (indexIsValid(index))
+            {
+                collidingCurves.Remove(index);
+            }
+            else
+                track.SendMessage("EnableCurve", index);
+        }
+    }
+
+    bool indexIsValid(int index)
+    {
+        if (curveIndex == 0 && (index == track.CurveCount - 1))
+            return true;
+        else if ((curveIndex == track.CurveCount - 1) && index == 0)
+            return true;
+        else if (Mathf.Abs(index - curveIndex) <= 1)
+            return true;
+
+        return false;
     }
 
     public delegate void TrackPartChangeDelegate(int currentIdx,int preIdx, int nextIdx);

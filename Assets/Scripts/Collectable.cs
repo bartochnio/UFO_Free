@@ -183,45 +183,45 @@ public class Collectable : MonoBehaviour {
     bool firstSet = true;
     void OnTriggerEnter2D(Collider2D c)
     {
-        if (c.tag == "Track")
-        {
-            PlayerController pc = FindObjectOfType<PlayerController>();
+        //if (c.tag == "Track")
+        //{
+        //    PlayerController pc = FindObjectOfType<PlayerController>();
 
-            int idx = int.Parse(c.name);
-            int low = myIdx - 1;
-            if (low == -1) low = pc.track.CurveCount;
-            int high = myIdx + 1;
-            if (high > pc.track.CurveCount) high = 0;
+        //    int idx = int.Parse(c.name);
+        //    int low = myIdx - 1;
+        //    if (low == -1) low = pc.track.CurveCount;
+        //    int high = myIdx + 1;
+        //    if (high > pc.track.CurveCount) high = 0;
 
-            if (idx != myIdx )
-            {
-                if (firstSet)
-                {
-                    myIdx = idx;
-                    //Debug.Log(name + " Moved to IDX " + idx);
+        //    if (idx != myIdx )
+        //    {
+        //        if (firstSet)
+        //        {
+        //            myIdx = idx;
+        //            //Debug.Log(name + " Moved to IDX " + idx);
                    
-                    int cur = pc.CurveIndex;
-                    int p = pc.PrevIndex;
-                    int n = pc.NextIndex;
-                    TrackPartChangedHandler(cur, p, n);
-                    firstSet = false;
-                }
-                else if ( (idx == high || idx == low))
-                {
+        //            int cur = pc.CurveIndex;
+        //            int p = pc.PrevIndex;
+        //            int n = pc.NextIndex;
+        //            TrackPartChangedHandler(cur, p, n);
+        //            firstSet = false;
+        //        }
+        //        else if ( (idx == high || idx == low))
+        //        {
                    
-                    {
-                        myIdx = idx;
-                        //Debug.Log(name + " Moved to IDX " + idx);
+        //            {
+        //                myIdx = idx;
+        //                //Debug.Log(name + " Moved to IDX " + idx);
                        
-                        int cur = pc.CurveIndex;
-                        int p = pc.PrevIndex;
-                        int n = pc.NextIndex;
-                        TrackPartChangedHandler(cur, p, n);
-                    }
-                }
+        //                int cur = pc.CurveIndex;
+        //                int p = pc.PrevIndex;
+        //                int n = pc.NextIndex;
+        //                TrackPartChangedHandler(cur, p, n);
+        //            }
+        //        }
                 
-            }
-        }
+        //    }
+        //}
     }
     bool isVisible = true;
 

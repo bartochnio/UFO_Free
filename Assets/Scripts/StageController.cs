@@ -18,6 +18,7 @@ public class StageController : MonoBehaviour {
         Messenger.AddListener(UFOEvents.PlayerFail, OnScoreBad);
         Messenger.AddListener(UFOEvents.PlayerScore, OnScoreGood);
         Messenger.AddListener(UFOEvents.GameOver, OnGameOver);
+        Messenger.AddListener(UFOEvents.PlayerFinished, OnFinished);
         Messenger<bool>.AddListener(UFOEvents.PlayerOutside, OnPlayerOutside);
         Messenger<bool>.AddListener(UFOEvents.PlayerWrongWay, OnPlayerWrongWay);
     }
@@ -27,6 +28,7 @@ public class StageController : MonoBehaviour {
         Messenger.RemoveListener(UFOEvents.PlayerFail, OnScoreBad);
         Messenger.RemoveListener(UFOEvents.PlayerScore, OnScoreGood);
         Messenger.RemoveListener(UFOEvents.GameOver, OnGameOver);
+        Messenger.RemoveListener(UFOEvents.PlayerFinished, OnFinished);
         Messenger<bool>.RemoveListener(UFOEvents.PlayerOutside, OnPlayerOutside);
         Messenger<bool>.RemoveListener(UFOEvents.PlayerWrongWay, OnPlayerWrongWay);
     }
@@ -86,6 +88,13 @@ public class StageController : MonoBehaviour {
     private void OnGameOver()
     {
         hud.ShowWarningMessage("GAME OVER", false, 0);
+        cockpit.SetActive(false);
+        hud.Pause(true);
+    }
+
+    private void OnFinished()
+    {
+        hud.ShowWarningMessage("FINISHED!", false, 0);
         cockpit.SetActive(false);
         hud.Pause(true);
     }
