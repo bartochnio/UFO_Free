@@ -8,6 +8,7 @@ public class Track : MonoBehaviour {
 	static public string levelToLoadHack = null;
 
     public GameObject finishLinePrefab;
+    public PlayerController player;
 
     BezierSpline spline;
     GameObject[] meshGOs;
@@ -86,7 +87,11 @@ public class Track : MonoBehaviour {
 
     void Update() 
     {
-	
+        float playerT = player.GetT();
+	    for(int i = 0; i < meshGOs.Length; ++i)
+        {
+            meshGOs[i].GetComponent<MeshRenderer>().material.SetFloat("_PlayerT", playerT);
+        }
 	}
 
     void ChangeCurveAlpha(int index, float alpha)
@@ -143,13 +148,17 @@ public class Track : MonoBehaviour {
             v += Vector2.Distance(pos, prevPos) / curveLen;
             v = Mathf.Clamp01(v);
 
+            float t = (progress + (float)index) / (float)spline.CurveCount;
+
             builder.PushVert((pos - lenDir * spline.Width));
             builder.PushNormal(normal);
             builder.PushUV(new Vector2(0.0f, v));
+            builder.PushUV2(new Vector2(t, progress));
 
             builder.PushVert((pos + lenDir * spline.Width));
             builder.PushNormal(normal);
             builder.PushUV(new Vector2(1.0f, v));
+            builder.PushUV2(new Vector2(t, index));
 
             prevPos = pos;
             if (j != 0)
@@ -192,22 +201,22 @@ public class Track : MonoBehaviour {
     {
         //meshGOs[index].GetComponent<MeshRenderer>().enabled = true;
 
-        ChangeCurveAlpha(index, 1.0f);
+        //ChangeCurveAlpha(index, 1.0f);
     }
 
     void DisableCurve(int index)
     {
         //meshGOs[index].GetComponent<MeshRenderer>().enabled = false;
 
-        ChangeCurveAlpha(index, 0.2f);
+        //ChangeCurveAlpha(index, 0.2f);
     }
     
     void DisableTrack()
     {
-        for (int i = 0; i < spline.CurveCount; ++i)
-        {
-            DisableCurve(i);
+        //for (int i = 0; i < spline.CurveCount; ++i)
+        //{
+        //    DisableCurve(i);
             //meshGOs[i].GetComponent<MeshRenderer>().enabled = false;
-        }
+        //}
     }
 }

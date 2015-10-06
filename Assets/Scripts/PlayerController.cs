@@ -30,6 +30,8 @@ public class PlayerController : MonoBehaviour {
     int curveIndex = 0;
     public int GetIndex() { return curveIndex; }
 
+    public float GetT() { return ((float)curveIndex + curT) / (float)track.CurveCount; }
+
     public void Respawn()
     {
         Vector3 pos = track.GetCurvePoint(curveIndex, 0.5f);
@@ -279,10 +281,10 @@ public class PlayerController : MonoBehaviour {
             if (indexIsValid(index))
             {
                 collidingCurves.Add(index);
-                track.SendMessage("EnableCurve", index);
+                //track.SendMessage("EnableCurve", index);
             }
-            else
-                track.SendMessage("DisableCurve", index);
+            //else
+                //track.SendMessage("DisableCurve", index);
         }
     }
 
