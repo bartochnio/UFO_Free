@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class StageController : MonoBehaviour {
 
@@ -48,7 +49,10 @@ public class StageController : MonoBehaviour {
 
     public void RestartStage()
     {
-        Application.LoadLevel(0);
+		if (Application.platform == RuntimePlatform.IPhonePlayer)
+			SceneManager.LoadScene ("Main");
+		else
+			SceneManager.LoadScene ("LevelEditor");
     }
 
     private void ResetScore()

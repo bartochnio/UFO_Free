@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using UnityEngine.SceneManagement;
 
 public class Track : MonoBehaviour {
 	static public bool lauchFromEditorHack = false;
@@ -25,13 +26,18 @@ public class Track : MonoBehaviour {
         CreateFinishLine();
     }
 
-	void OnGUI () {
+	/*void OnGUI () {
 		if (lauchFromEditorHack) {
-			if (GUI.Button (new Rect (Screen.width - 150, 0, 150, 30), "Editor")) {
-				Application.LoadLevel ("LevelEditor");
+			bool isIphone = Application.platform != RuntimePlatform.IPhonePlayer;
+
+			if (GUI.Button (new Rect (Screen.width - 150, 0, 150, 30), isIphone? "Menu" : "Editor")) {
+				if (!isIphone)
+					SceneManager.LoadScene ("LevelEditor");
+				else
+					SceneManager.LoadScene ("Main");
 			}
 		}
-	}
+	}*/
 
     void CreateFinishLine()
     {
@@ -49,7 +55,7 @@ public class Track : MonoBehaviour {
 		if (levelName == null)
 			return false;
 
-		string filename = levelName + ".ufo";
+		string filename = levelName + LevelObject.LevelFileExtStr;
 		string sepa = "" + System.IO.Path.DirectorySeparatorChar;
 
 		List<string> paths = new List<string> ();
