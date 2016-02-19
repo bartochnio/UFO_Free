@@ -49,10 +49,11 @@ public class StageController : MonoBehaviour {
 
     public void RestartStage()
     {
-		if (Application.platform == RuntimePlatform.IPhonePlayer)
+		SceneManager.LoadScene ("Main");
+		/*if (Application.platform == RuntimePlatform.IPhonePlayer)
 			SceneManager.LoadScene ("Main");
 		else
-			SceneManager.LoadScene ("LevelEditor");
+			SceneManager.LoadScene ("LevelEditor");*/
     }
 
     private void ResetScore()
